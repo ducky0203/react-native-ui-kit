@@ -1,6 +1,6 @@
 {
-  "name": "react-native-ui-kit",
-  "version": "0.1.0",
+  "name": "@ducky0203/react-native-ui-kit",
+  "version": "0.0.1",
   "description": "A React Native UI kit library",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
@@ -33,6 +33,7 @@
   ],
   "scripts": {
     "example": "yarn workspace react-native-ui-kit-example",
+    "build": "bob build",
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
     "prepare": "bob build",
     "typecheck": "tsc",
@@ -60,6 +61,7 @@
     "@eslint/compat": "^2.0.3",
     "@eslint/eslintrc": "^3.3.5",
     "@eslint/js": "^10.0.1",
+    "@react-native-vector-icons/feather": "^13.1.1",
     "@react-native/babel-preset": "0.85.0",
     "@react-native/eslint-config": "0.85.0",
     "@types/react": "^19.2.0",
@@ -72,12 +74,20 @@
     "react": "19.2.3",
     "react-native": "0.85.0",
     "react-native-builder-bob": "^0.41.0",
+    "react-native-gesture-handler": "^2.29.1",
+    "react-native-reanimated": "^4.3.1",
+    "react-native-safe-area-context": "^5.8.0",
+    "react-native-worklets": "^0.8.3",
     "turbo": "^2.8.21",
     "typescript": "^6.0.2"
   },
   "peerDependencies": {
+    "@react-native-vector-icons/feather": ">=13.0.0",
     "react": "*",
-    "react-native": "*"
+    "react-native": "*",
+    "react-native-gesture-handler": ">=2.24.0",
+    "react-native-reanimated": ">=4.0.0",
+    "react-native-safe-area-context": ">=5.0.0"
   },
   "workspaces": [
     "example"
