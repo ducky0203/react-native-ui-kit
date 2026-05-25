@@ -6,7 +6,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { colors } from '../theme/colors';
-import { fontSize } from '../theme/typography';
+import { fontSize, getFontStyle } from '../theme/typography';
 
 export type DividerProps = {
   layout?: 'horizontal' | 'vertical';
@@ -23,7 +23,7 @@ export function Divider({ layout = 'horizontal', label, style }: DividerProps) {
     return (
       <View style={[styles.labelRow, style]}>
         <View style={styles.line} />
-        <Text style={styles.label}>{label}</Text>
+        <Text style={[styles.label, getFontStyle()]}>{label}</Text>
         <View style={styles.line} />
       </View>
     );

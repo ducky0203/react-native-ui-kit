@@ -90,10 +90,10 @@ export type {
   ToastContainerProps,
 } from './toast';
 
-export { colors, severityColors } from './theme/colors';
-export type { Severity } from './theme/colors';
+export { colors, severityColors, configureTheme } from './theme/colors';
+export type { Colors, Severity } from './theme/colors';
 
-export { fontSize, lineHeight } from './theme/typography';
+export { fontSize, lineHeight, getFontStyle } from './theme/typography';
 
 export { Feather as FeatherIcon } from '@react-native-vector-icons/feather/static';
 

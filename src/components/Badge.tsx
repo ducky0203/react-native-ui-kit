@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { colors, severityColors, type Severity } from '../theme/colors';
-import { fontSize } from '../theme/typography';
+import { fontSize, getFontStyle } from '../theme/typography';
 
 export type BadgeSize = 'small' | 'normal' | 'large';
 
@@ -45,7 +45,10 @@ export function Badge({
         },
       ]}
     >
-      <Text numberOfLines={1} style={[styles.text, { fontSize: tokens.font }]}>
+      <Text
+        numberOfLines={1}
+        style={[styles.text, { fontSize: tokens.font }, getFontStyle()]}
+      >
         {text}
       </Text>
     </View>

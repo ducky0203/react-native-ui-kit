@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { Icon, type IconName } from './Icon';
 import { colors, severityColors, type Severity } from '../theme/colors';
-import { fontSize } from '../theme/typography';
+import { fontSize, getFontStyle } from '../theme/typography';
 
 export type TagProps = {
   value?: string;
@@ -29,7 +29,9 @@ export function Tag({
       ]}
     >
       {icon ? <Icon name={icon} size={12} color={colors.textInverse} /> : null}
-      {value ? <Text style={styles.text}>{value}</Text> : null}
+      {value ? (
+        <Text style={[styles.text, getFontStyle()]}>{value}</Text>
+      ) : null}
     </View>
   );
 }

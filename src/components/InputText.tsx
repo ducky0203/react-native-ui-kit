@@ -9,7 +9,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { colors } from '../theme/colors';
-import { fontSize } from '../theme/typography';
+import { fontSize, getFontStyle } from '../theme/typography';
 
 export type InputTextProps = {
   label?: string;
@@ -53,7 +53,9 @@ export function InputText({
 
   return (
     <View style={[styles.container, style]}>
-      {label ? <Text style={styles.label}>{label}</Text> : null}
+      {label ? (
+        <Text style={[styles.label, getFontStyle()]}>{label}</Text>
+      ) : null}
       <TextInput
         value={value}
         onChangeText={onChangeText}
@@ -74,12 +76,17 @@ export function InputText({
           { borderColor },
           multiline ? styles.multiline : null,
           disabled ? styles.disabled : null,
+          getFontStyle(),
         ]}
       />
       {message ? (
         <Text
           accessibilityLiveRegion={invalid ? 'polite' : 'none'}
-          style={[styles.message, invalid ? styles.error : styles.helper]}
+          style={[
+            styles.message,
+            invalid ? styles.error : styles.helper,
+            getFontStyle(),
+          ]}
         >
           {message}
         </Text>

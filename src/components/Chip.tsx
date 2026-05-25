@@ -8,7 +8,7 @@ import Animated, {
 import { Icon, type IconName } from './Icon';
 import { colors } from '../theme/colors';
 import { motionDuration } from '../theme/motion';
-import { fontSize } from '../theme/typography';
+import { fontSize, getFontStyle } from '../theme/typography';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -34,7 +34,9 @@ export function Chip({ label, icon, removable = false, onRemove }: ChipProps) {
       style={styles.chip}
     >
       {icon ? <Icon name={icon} size={14} color={colors.textMuted} /> : null}
-      {label ? <Text style={styles.label}>{label}</Text> : null}
+      {label ? (
+        <Text style={[styles.label, getFontStyle()]}>{label}</Text>
+      ) : null}
       {removable ? (
         <AnimatedPressable
           accessibilityRole="button"

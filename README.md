@@ -81,16 +81,196 @@ export default function App() {
 <Button
   label="Lưu"
   icon="save"
-  severity="primary"
-  size="normal"
-  outlined={false}
-  loading={false}
+  severity="primary"   // primary | secondary | success | info | warning | danger
+  size="normal"        // small | normal | large
+  outlined             // viền, nền trong suốt
+  text                 // không viền, không nền
+  rounded              // bo tròn hoàn toàn
+  loading              // thay label bằng ActivityIndicator
+  disabled
   onPress={() => {}}
 />
 ```
 
-`severity`: `primary` | `secondary` | `success` | `info` | `warning` | `danger`
-`size`: `small` | `normal` | `large`
+### Typography
+
+```tsx
+<Typography variant="h1">Tiêu đề</Typography>
+<Typography variant="body" color={colors.textMuted}>Mô tả</Typography>
+```
+
+`variant`: `h1` | `h2` | `h3` | `h4` | `body` | `bodySmall` | `caption` | `label`
+
+### InputText
+
+```tsx
+<InputText
+  label="Email"
+  value={email}
+  onChangeText={setEmail}
+  placeholder="you@example.com"
+  invalid={hasError}
+  errorText="Email không hợp lệ"
+  helperText="Dùng email công ty"
+  disabled
+  secureTextEntry
+  multiline
+/>
+```
+
+### Select
+
+```tsx
+const options = [
+  { label: 'Hà Nội', value: 'hn' },
+  { label: 'TP.HCM', value: 'hcm' },
+];
+
+<Select
+  options={options}
+  value={city}
+  onChange={setCity}
+  label="Thành phố"
+  placeholder="Chọn thành phố..."
+  invalid={hasError}
+  errorText="Vui lòng chọn"
+/>
+```
+
+### Card
+
+```tsx
+<Card
+  title="Tiêu đề"
+  subTitle="Mô tả ngắn"
+  header={<Image source={banner} />}
+  footer={<Button label="Xem thêm" />}
+>
+  <Typography>Nội dung card</Typography>
+</Card>
+```
+
+### Badge, Tag, Chip
+
+```tsx
+// Huy hiệu số
+<Badge value={5} severity="danger" size="normal" />
+
+// Nhãn màu
+<Tag value="Mới" severity="success" icon="star" rounded />
+
+// Chip xóa được
+<Chip label="React Native" icon="code" removable onRemove={() => {}} />
+```
+
+### Avatar
+
+```tsx
+<Avatar label="DN" size="large" severity="primary" shape="circle" />
+<Avatar image="https://..." size="normal" />
+<Avatar icon="user" size="xlarge" />
+```
+
+`size`: `normal` | `large` | `xlarge`
+
+### ProgressBar & ProgressCircle
+
+```tsx
+<ProgressBar value={72} severity="success" showValue />
+
+<ProgressCircle value={72} size={96} strokeWidth={8} severity="primary" showValue />
+```
+
+### Accordion
+
+```tsx
+<Accordion
+  multiple
+  defaultActiveIndices={[0]}
+  items={[
+    { title: 'Câu hỏi 1', content: <Typography>Nội dung 1</Typography> },
+    { title: 'Câu hỏi 2', content: <Typography>Nội dung 2</Typography>, icon: 'help-circle' },
+  ]}
+/>
+```
+
+### Panel
+
+```tsx
+<Panel header="Bộ lọc" toggleable defaultCollapsed>
+  <InputText label="Tìm kiếm" />
+</Panel>
+```
+
+### TabView
+
+```tsx
+<TabView
+  defaultIndex={0}
+  onChange={(index) => console.log(index)}
+  tabs={[
+    { title: 'Tổng quan', content: <Overview /> },
+    { title: 'Chi tiết',  content: <Details />, icon: 'list' },
+  ]}
+/>
+```
+
+### Menu
+
+```tsx
+<Menu
+  triggerLabel="Tùy chọn"
+  triggerIcon="more-vertical"
+  align="end"
+  items={[
+    { label: 'Chỉnh sửa', icon: 'edit-2', onPress: handleEdit },
+    { label: 'Xóa', icon: 'trash-2', severity: 'danger', onPress: handleDelete },
+    { label: 'Không hoạt động', icon: 'slash', disabled: true },
+  ]}
+/>
+```
+
+### FlatList / SectionList
+
+```tsx
+<FlatList
+  data={items}
+  renderItem={({ item }) => <ItemCard item={item} />}
+  keyExtractor={(item) => item.id}
+  loading={isLoading}           // skeleton toàn màn hình
+  refreshing={isRefreshing}
+  onRefresh={handleRefresh}
+  loadingMore={isFetchingMore}
+  onLoadMore={fetchNextPage}
+  emptyText="Không có dữ liệu"
+  emptyIcon="inbox"
+/>
+```
+
+### EmptyState
+
+```tsx
+<EmptyState
+  title="Chưa có đơn hàng"
+  description="Tạo đơn hàng đầu tiên của bạn"
+  icon="shopping-bag"
+/>
+```
+
+### Screen
+
+```tsx
+<Screen backgroundColor="#F8FAFC" edges={['top', 'bottom']}>
+  {/* nội dung */}
+</Screen>
+```
+
+### Divider
+
+```tsx
+<Divider />                      // ngang
+<Divider layout="vertical" />   // dọc
+<Divider label="HOẶC" />        // có nhãn
 
 ### Toast
 
@@ -122,12 +302,76 @@ Toast.show({ type: 'info', text1: 'Hello' });
 
 ### Theme
 
+Gọi `configureTheme` **một lần** ở entry point (trước khi render bất kỳ component nào):
+
+```tsx
+import { configureTheme } from 'react-native-ui-kit';
+
+configureTheme({
+  colors: {
+    primary: '#6366F1',   // indigo thay vì blue mặc định
+    danger:  '#DC2626',
+  },
+  font: {
+    family: 'SFProDisplay-Regular', // tên font đã load vào app
+  },
+});
+```
+
+Chỉ cần truyền các key muốn override — phần còn lại giữ nguyên default.
+
+#### Bảng màu mặc định
+
+| Token | Giá trị | Dùng cho |
+|---|---|---|
+| `primary` | `#3B82F6` | Nút, focus, accent chính |
+| `secondary` | `#64748B` | Nút/tag thứ cấp |
+| `success` | `#22C55E` | Xác nhận thành công |
+| `info` | `#06B6D4` | Thông tin |
+| `warning` | `#F59E0B` | Cảnh báo |
+| `danger` | `#EF4444` | Lỗi, hủy, xóa |
+| `surface` | `#FFFFFF` | Nền thẻ/card |
+| `surfaceMuted` | `#F1F5F9` | Nền mờ, disabled |
+| `border` | `#E2E8F0` | Viền input, divider |
+| `text` | `#0F172A` | Chữ chính |
+| `textMuted` | `#64748B` | Chữ phụ, placeholder |
+| `textInverse` | `#FFFFFF` | Chữ trên nền tối |
+
+#### Dùng trực tiếp trong app
+
 ```tsx
 import { colors, severityColors, type Severity } from 'react-native-ui-kit';
 
-// colors.primary, colors.surface, colors.text, ...
-// severityColors['warning']
+// Sau khi configureTheme chạy, object này đã được cập nhật
+const style = { color: colors.primary };
+const tone  = severityColors['warning'];
 ```
+
+#### Tích hợp font (San Francisco Pro / custom font)
+
+1. Load font vào app trước (ví dụ Expo):
+
+```tsx
+// app/_layout.tsx (Expo Router)
+import { useFonts } from 'expo-font';
+
+const [loaded] = useFonts({
+  'SFProDisplay-Regular': require('./assets/fonts/SF-Pro-Display-Regular.otf'),
+  'SFProDisplay-Semibold': require('./assets/fonts/SF-Pro-Display-Semibold.otf'),
+});
+```
+
+2. Sau đó gọi `configureTheme`:
+
+```tsx
+configureTheme({
+  font: { family: 'SFProDisplay-Regular' },
+});
+```
+
+Font sẽ áp dụng toàn bộ component: `Typography`, `Button`, `Badge`, `Chip`, `Tag`, `Avatar`, `Divider`, `InputText`, `ProgressBar`, `Menu`.
+
+> **Lưu ý:** Lib chỉ nhận *tên* font — việc load file font (`.otf`, `.ttf`) là trách nhiệm của app thông qua `expo-font`, `react-native-font` hoặc link native.
 
 Icon dùng tên Feather (ví dụ `'check-circle'`, `'menu'`). Type `IconName` được export từ thư viện.
 
@@ -170,7 +414,15 @@ Entry point: `src/index.tsx` → publish qua field `exports` trong `package.json
 
 ## API export
 
-Toàn bộ component, props types, `colors`, `severityColors`, `FeatherIcon`, và re-export `SafeAreaProvider` / `SafeAreaView` / `useSafeAreaInsets` — xem [`src/index.tsx`](./src/index.tsx).
+| Export | Mô tả |
+|---|---|
+| Components | `Screen`, `Button`, `Typography`, `InputText`, `Select`, `Card`, `Badge`, `Avatar`, `Chip`, `Tag`, `Icon`, `Divider`, `Menu`, `Accordion`, `Panel`, `TabView`, `FlatList`, `SectionList`, `EmptyState`, `ProgressBar`, `ProgressCircle` |
+| Toast | `ToastProvider`, `useToast`, `showToast`, `Toast`, `ToastContainer`, `uiKitToastConfig` |
+| Theme | `configureTheme`, `colors`, `severityColors`, `getFontStyle` |
+| Types | `Severity`, `Colors`, `IconName`, tất cả `*Props` types |
+| Re-exports | `SafeAreaProvider`, `SafeAreaView`, `useSafeAreaInsets`, `GestureHandlerRootView`, `FeatherIcon` |
+
+Xem đầy đủ tại [`src/index.tsx`](./src/index.tsx).
 
 ## Contributing
 

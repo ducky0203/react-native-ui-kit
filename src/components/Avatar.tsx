@@ -1,6 +1,7 @@
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { Icon, type IconName } from './Icon';
 import { colors, severityColors, type Severity } from '../theme/colors';
+import { getFontStyle } from '../theme/typography';
 
 export type AvatarSize = 'normal' | 'large' | 'xlarge';
 
@@ -67,7 +68,11 @@ export function Avatar({
         <Icon name={icon} size={dim * 0.5} color={foreground} />
       ) : (
         <Text
-          style={[styles.label, { fontSize: dim * 0.4, color: foreground }]}
+          style={[
+            styles.label,
+            { fontSize: dim * 0.4, color: foreground },
+            getFontStyle(),
+          ]}
         >
           {label ? label.slice(0, 2).toUpperCase() : ''}
         </Text>

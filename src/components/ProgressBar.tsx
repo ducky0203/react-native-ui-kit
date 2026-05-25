@@ -8,7 +8,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { colors, severityColors, type Severity } from '../theme/colors';
 import { motionDuration } from '../theme/motion';
-import { fontSize } from '../theme/typography';
+import { fontSize, getFontStyle } from '../theme/typography';
 
 export type ProgressBarProps = {
   /** Progress value, 0-100. */
@@ -57,7 +57,9 @@ export function ProgressBar({
           ]}
         />
       </View>
-      {showValue ? <Text style={styles.value}>{Math.round(pct)}%</Text> : null}
+      {showValue ? (
+        <Text style={[styles.value, getFontStyle()]}>{Math.round(pct)}%</Text>
+      ) : null}
     </View>
   );
 }

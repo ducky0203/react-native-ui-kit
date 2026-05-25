@@ -26,7 +26,7 @@ import Animated, {
 import { Icon, type IconName } from './Icon';
 import { colors, severityColors, type Severity } from '../theme/colors';
 import { motionDuration } from '../theme/motion';
-import { fontSize } from '../theme/typography';
+import { fontSize, getFontStyle } from '../theme/typography';
 
 export type MenuItem = {
   label: string;
@@ -180,7 +180,9 @@ export function Menu({
             <Icon name={triggerIcon} size={18} color={colors.text} />
           ) : null}
           {triggerLabel ? (
-            <Text style={styles.triggerLabel}>{triggerLabel}</Text>
+            <Text style={[styles.triggerLabel, getFontStyle()]}>
+              {triggerLabel}
+            </Text>
           ) : null}
           <Animated.View style={caretStyle}>
             <Icon name="chevron-down" size={18} color={colors.textMuted} />
@@ -228,7 +230,13 @@ export function Menu({
                         {item.icon ? (
                           <Icon name={item.icon} size={18} color={tone} />
                         ) : null}
-                        <Text style={[styles.itemLabel, { color: tone }]}>
+                        <Text
+                          style={[
+                            styles.itemLabel,
+                            { color: tone },
+                            getFontStyle(),
+                          ]}
+                        >
                           {item.label}
                         </Text>
                       </Pressable>

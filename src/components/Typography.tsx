@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { Text, type StyleProp, type TextStyle } from 'react-native';
 import { colors } from '../theme/colors';
-import { fontSize, lineHeight } from '../theme/typography';
+import { fontSize, getFontStyle, lineHeight } from '../theme/typography';
 
 export type TypographyVariant =
   | 'h1'
@@ -65,7 +65,7 @@ export function Typography({
     <Text
       accessibilityRole={isHeading ? 'header' : 'text'}
       numberOfLines={numberOfLines}
-      style={[variantStyles[variant], { color }, style]}
+      style={[variantStyles[variant], { color }, getFontStyle(), style]}
     >
       {children}
     </Text>

@@ -14,7 +14,7 @@ import Animated, {
 import { Icon, type IconName } from './Icon';
 import { colors, severityColors, type Severity } from '../theme/colors';
 import { motionDuration } from '../theme/motion';
-import { fontSize } from '../theme/typography';
+import { fontSize, getFontStyle } from '../theme/typography';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -128,7 +128,11 @@ export function Button({
       {!loading && iconNode && iconPos === 'left' ? iconNode : null}
       {label ? (
         <Text
-          style={[styles.label, { color: contentColor, fontSize: tokens.font }]}
+          style={[
+            styles.label,
+            { color: contentColor, fontSize: tokens.font },
+            getFontStyle(),
+          ]}
         >
           {label}
         </Text>
