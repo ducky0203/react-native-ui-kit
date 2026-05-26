@@ -1,7 +1,6 @@
 {
   "name": "@ducky0203/react-native-ui-kit",
   "version": "0.0.1",
-  "private": true,
   "description": "A React Native UI kit library",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
@@ -90,9 +89,6 @@
     "react-native-reanimated": ">=4.0.0",
     "react-native-safe-area-context": ">=5.0.0"
   },
-  "workspaces": [
-    "example"
-  ],
   "packageManager": "yarn@4.11.0",
   "react-native-builder-bob": {
     "source": "src",
