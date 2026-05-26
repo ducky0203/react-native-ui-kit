@@ -5,7 +5,12 @@ import {
   ScrollView,
   StyleSheet,
 } from 'react-native';
-import { InputText, Select, Typography, colors } from 'react-native-ui-kit';
+import {
+  InputText,
+  Select,
+  Typography,
+  colors,
+} from '@ducky0203/react-native-ui-kit';
 
 export function FormScreen() {
   const [name, setName] = useState('');

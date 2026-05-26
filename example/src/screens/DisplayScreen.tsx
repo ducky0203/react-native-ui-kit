@@ -1,5 +1,10 @@
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { Avatar, Badge, Card, Typography } from 'react-native-ui-kit';
+import {
+  Avatar,
+  Badge,
+  Card,
+  Typography,
+} from '@ducky0203/react-native-ui-kit';
 
 export function DisplayScreen() {
   return (

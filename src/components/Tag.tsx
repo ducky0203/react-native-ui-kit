@@ -16,8 +16,6 @@ export function Tag({
   icon,
   rounded = false,
 }: TagProps) {
-  const tone = severityColors[severity];
-
   return (
     <View
       accessible
@@ -25,7 +23,8 @@ export function Tag({
       accessibilityLabel={value}
       style={[
         styles.tag,
-        { backgroundColor: tone, borderRadius: rounded ? 999 : 3 },
+        rounded ? styles.tagRounded : styles.tagSquare,
+        { backgroundColor: severityColors[severity] },
       ]}
     >
       {icon ? <Icon name={icon} size={12} color={colors.textInverse} /> : null}
@@ -45,6 +44,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 3,
   },
+  tagRounded: { borderRadius: 999 },
+  tagSquare:  { borderRadius: 3 },
   text: {
     fontSize: fontSize.default,
     fontWeight: '700',

@@ -1,22 +1,15 @@
+import { useMemo } from 'react';
 import {
   ActivityIndicator,
+  Pressable,
   StyleSheet,
   Text,
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
-import { Pressable } from 'react-native-gesture-handler';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
 import { Icon, type IconName } from './Icon';
 import { colors, severityColors, type Severity } from '../theme/colors';
-import { motionDuration } from '../theme/motion';
 import { fontSize, getFontStyle } from '../theme/typography';
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export type ButtonSize = 'small' | 'normal' | 'large';
 
@@ -86,29 +79,31 @@ export function Button({
   const filled = !outlined && !text;
   const contentColor = filled ? colors.textInverse : tone;
 
-  const pressed = useSharedValue(0);
-  const baseOpacity = isDisabled ? 0.5 : 1;
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: 1 - pressed.value * 0.04 }],
-    opacity: baseOpacity * (1 - pressed.value * 0.2),
-  }));
+  const containerStyle = useMemo(
+    (): ViewStyle => ({
+      backgroundColor: filled ? tone : 'transparent',
+      borderColor: outlined ? tone : 'transparent',
+      borderWidth: outlined ? 1.5 : 0,
+      paddingVertical: tokens.paddingV,
+      paddingHorizontal: text ? tokens.paddingH / 2 : tokens.paddingH,
+      borderRadius: rounded ? 999 : 3,
+      gap: tokens.gap,
+      opacity: isDisabled ? 0.5 : 1,
+    }),
+    [filled, tone, outlined, tokens, text, rounded, isDisabled]
+  );
 
-  const containerStyle: ViewStyle = {
-    backgroundColor: filled ? tone : 'transparent',
-    borderColor: outlined ? tone : 'transparent',
-    borderWidth: outlined ? 1.5 : 0,
-    paddingVertical: tokens.paddingV,
-    paddingHorizontal: text ? tokens.paddingH / 2 : tokens.paddingH,
-    borderRadius: rounded ? 999 : 3,
-    gap: tokens.gap,
-  };
+  const labelStyle = useMemo(
+    () => [styles.label, { color: contentColor, fontSize: tokens.font }, getFontStyle()],
+    [contentColor, tokens.font]
+  );
 
   const iconNode = icon ? (
     <Icon name={icon} size={tokens.icon} color={contentColor} />
   ) : null;
 
   return (
-    <AnimatedPressable
+    <Pressable
       accessible
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? label}
@@ -116,29 +111,22 @@ export function Button({
       accessibilityState={{ disabled: isDisabled, busy: loading }}
       disabled={isDisabled}
       onPress={onPress}
-      onPressIn={() => {
-        pressed.value = withTiming(1, { duration: motionDuration.pressIn });
-      }}
-      onPressOut={() => {
-        pressed.value = withTiming(0, { duration: motionDuration.pressOut });
-      }}
-      style={[styles.base, containerStyle, animatedStyle, style]}
+      style={({ pressed }) => [
+        styles.base,
+        containerStyle,
+        pressed && styles.pressed,
+        style,
+      ]}
     >
       {loading ? <ActivityIndicator size="small" color={contentColor} /> : null}
       {!loading && iconNode && iconPos === 'left' ? iconNode : null}
       {label ? (
-        <Text
-          style={[
-            styles.label,
-            { color: contentColor, fontSize: tokens.font },
-            getFontStyle(),
-          ]}
-        >
+        <Text style={labelStyle}>
           {label}
         </Text>
       ) : null}
       {!loading && iconNode && iconPos === 'right' ? iconNode : null}
-    </AnimatedPressable>
+    </Pressable>
   );
 }
 
@@ -147,6 +135,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  pressed: {
+    opacity: 0.75,
   },
   label: {
     fontSize: fontSize.default,

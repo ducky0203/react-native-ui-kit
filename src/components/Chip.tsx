@@ -1,16 +1,7 @@
-import { StyleSheet, Text, View } from 'react-native';
-import { Pressable } from 'react-native-gesture-handler';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Icon, type IconName } from './Icon';
 import { colors } from '../theme/colors';
-import { motionDuration } from '../theme/motion';
 import { fontSize, getFontStyle } from '../theme/typography';
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export type ChipProps = {
   label?: string;
@@ -20,12 +11,6 @@ export type ChipProps = {
 };
 
 export function Chip({ label, icon, removable = false, onRemove }: ChipProps) {
-  const pressed = useSharedValue(0);
-  const removeStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: 1 - pressed.value * 0.15 }],
-    opacity: 1 - pressed.value * 0.3,
-  }));
-
   return (
     <View
       accessible
@@ -38,23 +23,15 @@ export function Chip({ label, icon, removable = false, onRemove }: ChipProps) {
         <Text style={[styles.label, getFontStyle()]}>{label}</Text>
       ) : null}
       {removable ? (
-        <AnimatedPressable
+        <Pressable
           accessibilityRole="button"
           accessibilityLabel={label ? `Remove ${label}` : 'Remove'}
           hitSlop={6}
-          onPressIn={() => {
-            pressed.value = withTiming(1, { duration: motionDuration.pressIn });
-          }}
-          onPressOut={() => {
-            pressed.value = withTiming(0, {
-              duration: motionDuration.pressOut,
-            });
-          }}
           onPress={onRemove}
-          style={[styles.remove, removeStyle]}
+          style={({ pressed }) => [styles.remove, pressed && styles.pressed]}
         >
           <Icon name="x" size={14} color={colors.textMuted} />
-        </AnimatedPressable>
+        </Pressable>
       ) : null}
     </View>
   );
@@ -78,5 +55,8 @@ const styles = StyleSheet.create({
   },
   remove: {
     borderRadius: 999,
+  },
+  pressed: {
+    opacity: 0.5,
   },
 });

@@ -4,7 +4,7 @@ import {
   GestureHandlerRootView,
   SafeAreaProvider,
   ToastProvider,
-} from 'react-native-ui-kit';
+} from '@ducky0203/react-native-ui-kit';
 import type { RootStackParamList } from './navigation';
 import { HomeScreen } from './screens/HomeScreen';
 import { ButtonsScreen } from './screens/ButtonsScreen';

@@ -5,7 +5,7 @@ import {
   Panel,
   TabView,
   Typography,
-} from 'react-native-ui-kit';
+} from '@ducky0203/react-native-ui-kit';
 
 export function LayoutScreen() {
   return (

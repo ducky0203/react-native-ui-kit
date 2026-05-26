@@ -1,6 +1,11 @@
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Button, FlatList, Typography, colors } from 'react-native-ui-kit';
+import {
+  Button,
+  FlatList,
+  Typography,
+  colors,
+} from '@ducky0203/react-native-ui-kit';
 
 const makeItems = (start: number, count: number): number[] =>
   Array.from({ length: count }, (_, i) => start + i);
@@ -35,7 +40,7 @@ export function ListsScreen() {
       keyExtractor={(item) => String(item)}
       renderItem={({ item }) => (
         <View style={styles.row}>
-          <Typography variant="body">Item #{item + 1}</Typography>
+          <Typography variant={'caption'}>Item #{item + 1}</Typography>
         </View>
       )}
       refreshing={refreshing}

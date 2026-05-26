@@ -6,7 +6,7 @@ import {
   Typography,
   colors,
   type IconName,
-} from 'react-native-ui-kit';
+} from '@ducky0203/react-native-ui-kit';
 import type { RootStackParamList } from '../navigation';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;

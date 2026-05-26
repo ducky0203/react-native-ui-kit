@@ -15,12 +15,6 @@ export type AvatarProps = {
   accessibilityLabel?: string;
 };
 
-const sizeTokens: Record<AvatarSize, number> = {
-  normal: 40,
-  large: 56,
-  xlarge: 72,
-};
-
 export function Avatar({
   label,
   icon,
@@ -30,12 +24,13 @@ export function Avatar({
   severity,
   accessibilityLabel,
 }: AvatarProps) {
-  const dim = sizeTokens[size];
-  const radius = shape === 'circle' ? dim / 2 : 8;
   const background = severity ? severityColors[severity] : colors.surfaceMuted;
   const foreground = severity ? colors.textInverse : colors.text;
   const a11yLabel =
     accessibilityLabel ?? (label ? `Avatar ${label}` : 'Avatar');
+
+  const sizeStyle = sizeStyles[size];
+  const shapeStyle = shape === 'circle' ? circleStyles[size] : styles.square;
 
   if (image) {
     return (
@@ -44,7 +39,7 @@ export function Avatar({
         accessibilityRole="image"
         accessibilityLabel={a11yLabel}
         source={{ uri: image }}
-        style={{ width: dim, height: dim, borderRadius: radius }}
+        style={[sizeStyle, shapeStyle]}
       />
     );
   }
@@ -54,25 +49,13 @@ export function Avatar({
       accessible
       accessibilityRole="image"
       accessibilityLabel={a11yLabel}
-      style={[
-        styles.placeholder,
-        {
-          width: dim,
-          height: dim,
-          borderRadius: radius,
-          backgroundColor: background,
-        },
-      ]}
+      style={[styles.placeholder, sizeStyle, shapeStyle, { backgroundColor: background }]}
     >
       {icon ? (
-        <Icon name={icon} size={dim * 0.5} color={foreground} />
+        <Icon name={icon} size={iconSizes[size]} color={foreground} />
       ) : (
         <Text
-          style={[
-            styles.label,
-            { fontSize: dim * 0.4, color: foreground },
-            getFontStyle(),
-          ]}
+          style={[styles.label, labelStyles[size], { color: foreground }, getFontStyle()]}
         >
           {label ? label.slice(0, 2).toUpperCase() : ''}
         </Text>
@@ -89,4 +72,34 @@ const styles = StyleSheet.create({
   label: {
     fontWeight: '700',
   },
+  square: {
+    borderRadius: 8,
+  },
 });
+
+const sizeStyles = StyleSheet.create({
+  normal: { width: 40, height: 40 },
+  large:  { width: 56, height: 56 },
+  xlarge: { width: 72, height: 72 },
+});
+
+// borderRadius = dim / 2 cho circle
+const circleStyles = StyleSheet.create({
+  normal: { borderRadius: 20 },
+  large:  { borderRadius: 28 },
+  xlarge: { borderRadius: 36 },
+});
+
+// fontSize = dim * 0.4
+const labelStyles = StyleSheet.create({
+  normal: { fontSize: 16 },
+  large:  { fontSize: 22 },
+  xlarge: { fontSize: 29 },
+});
+
+// icon size = dim * 0.5
+const iconSizes: Record<AvatarSize, number> = {
+  normal: 20,
+  large:  28,
+  xlarge: 36,
+};

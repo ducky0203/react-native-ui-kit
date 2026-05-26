@@ -9,7 +9,7 @@ import {
   Tag,
   Typography,
   useToast,
-} from 'react-native-ui-kit';
+} from '@ducky0203/react-native-ui-kit';
 
 export function FeedbackScreen() {
   const toast = useToast();

@@ -11,22 +11,12 @@ export type BadgeProps = {
   accessibilityLabel?: string;
 };
 
-const sizeTokens: Record<
-  BadgeSize,
-  { minSize: number; font: number; paddingH: number }
-> = {
-  small: { minSize: 16, font: fontSize.small, paddingH: 4 },
-  normal: { minSize: 20, font: fontSize.default, paddingH: 6 },
-  large: { minSize: 26, font: fontSize.large, paddingH: 8 },
-};
-
 export function Badge({
   value,
   severity = 'primary',
   size = 'normal',
   accessibilityLabel,
 }: BadgeProps) {
-  const tokens = sizeTokens[size];
   const text = value != null ? String(value) : '';
 
   return (
@@ -34,20 +24,11 @@ export function Badge({
       accessible
       accessibilityRole="text"
       accessibilityLabel={accessibilityLabel ?? text}
-      style={[
-        styles.badge,
-        {
-          backgroundColor: severityColors[severity],
-          minWidth: tokens.minSize,
-          height: tokens.minSize,
-          borderRadius: tokens.minSize / 2,
-          paddingHorizontal: tokens.paddingH,
-        },
-      ]}
+      style={[styles.badge, sizeStyles[size], { backgroundColor: severityColors[severity] }]}
     >
       <Text
         numberOfLines={1}
-        style={[styles.text, { fontSize: tokens.font }, getFontStyle()]}
+        style={[styles.text, fontSizeStyles[size], getFontStyle()]}
       >
         {text}
       </Text>
@@ -64,4 +45,16 @@ const styles = StyleSheet.create({
     color: colors.textInverse,
     fontWeight: '700',
   },
+});
+
+const sizeStyles = StyleSheet.create({
+  small:  { minWidth: 16, height: 16, borderRadius: 8,  paddingHorizontal: 4 },
+  normal: { minWidth: 20, height: 20, borderRadius: 10, paddingHorizontal: 6 },
+  large:  { minWidth: 26, height: 26, borderRadius: 13, paddingHorizontal: 8 },
+});
+
+const fontSizeStyles = StyleSheet.create({
+  small:  { fontSize: fontSize.small },
+  normal: { fontSize: fontSize.default },
+  large:  { fontSize: fontSize.large },
 });
