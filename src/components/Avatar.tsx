@@ -49,13 +49,23 @@ export function Avatar({
       accessible
       accessibilityRole="image"
       accessibilityLabel={a11yLabel}
-      style={[styles.placeholder, sizeStyle, shapeStyle, { backgroundColor: background }]}
+      style={[
+        styles.placeholder,
+        sizeStyle,
+        shapeStyle,
+        { backgroundColor: background },
+      ]}
     >
       {icon ? (
         <Icon name={icon} size={iconSizes[size]} color={foreground} />
       ) : (
         <Text
-          style={[styles.label, labelStyles[size], { color: foreground }, getFontStyle()]}
+          style={[
+            styles.label,
+            labelStyles[size],
+            { color: foreground },
+            getFontStyle(),
+          ]}
         >
           {label ? label.slice(0, 2).toUpperCase() : ''}
         </Text>
@@ -79,27 +89,27 @@ const styles = StyleSheet.create({
 
 const sizeStyles = StyleSheet.create({
   normal: { width: 40, height: 40 },
-  large:  { width: 56, height: 56 },
+  large: { width: 56, height: 56 },
   xlarge: { width: 72, height: 72 },
 });
 
 // borderRadius = dim / 2 cho circle
 const circleStyles = StyleSheet.create({
   normal: { borderRadius: 20 },
-  large:  { borderRadius: 28 },
+  large: { borderRadius: 28 },
   xlarge: { borderRadius: 36 },
 });
 
 // fontSize = dim * 0.4
 const labelStyles = StyleSheet.create({
   normal: { fontSize: 16 },
-  large:  { fontSize: 22 },
+  large: { fontSize: 22 },
   xlarge: { fontSize: 29 },
 });
 
 // icon size = dim * 0.5
 const iconSizes: Record<AvatarSize, number> = {
   normal: 20,
-  large:  28,
+  large: 28,
   xlarge: 36,
 };

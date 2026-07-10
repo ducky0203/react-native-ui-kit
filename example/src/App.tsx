@@ -1,6 +1,6 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import {
   SafeAreaProvider,
   ToastProvider,
@@ -18,7 +18,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.root}>
       <SafeAreaProvider>
         <ToastProvider>
           <NavigationContainer>
@@ -65,3 +65,7 @@ export default function App() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  root: { flex: 1 },
+});

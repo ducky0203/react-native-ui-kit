@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
   },
   tagRounded: { borderRadius: 999 },
-  tagSquare:  { borderRadius: 3 },
+  tagSquare: { borderRadius: 3 },
   text: {
     fontSize: fontSize.default,
     fontWeight: '700',

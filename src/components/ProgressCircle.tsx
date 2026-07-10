@@ -85,14 +85,16 @@ export function ProgressCircle({
       style={{ width: size, height: size }}
     >
       <View
-        style={{
-          position: 'absolute',
-          width: size,
-          height: size,
-          borderRadius: radius,
-          borderWidth: strokeWidth,
-          borderColor: colors.surfaceMuted,
-        }}
+        style={[
+          styles.track,
+          {
+            width: size,
+            height: size,
+            borderRadius: radius,
+            borderWidth: strokeWidth,
+            borderColor: colors.surfaceMuted,
+          },
+        ]}
       />
 
       <View
@@ -103,7 +105,9 @@ export function ProgressCircle({
         />
       </View>
 
-      <View style={[styles.clip, { width: radius, height: size, left: 0 }]}>
+      <View
+        style={[styles.clip, styles.clipLeft, { width: radius, height: size }]}
+      >
         <Animated.View style={[ringBase, leftStyle]} />
       </View>
 
@@ -117,10 +121,16 @@ export function ProgressCircle({
 }
 
 const styles = StyleSheet.create({
+  track: {
+    position: 'absolute',
+  },
   clip: {
     position: 'absolute',
     top: 0,
     overflow: 'hidden',
+  },
+  clipLeft: {
+    left: 0,
   },
   center: {
     position: 'absolute',

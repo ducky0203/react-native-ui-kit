@@ -94,7 +94,11 @@ export function Button({
   );
 
   const labelStyle = useMemo(
-    () => [styles.label, { color: contentColor, fontSize: tokens.font }, getFontStyle()],
+    () => [
+      styles.label,
+      { color: contentColor, fontSize: tokens.font },
+      getFontStyle(),
+    ],
     [contentColor, tokens.font]
   );
 
@@ -120,11 +124,7 @@ export function Button({
     >
       {loading ? <ActivityIndicator size="small" color={contentColor} /> : null}
       {!loading && iconNode && iconPos === 'left' ? iconNode : null}
-      {label ? (
-        <Text style={labelStyle}>
-          {label}
-        </Text>
-      ) : null}
+      {label ? <Text style={labelStyle}>{label}</Text> : null}
       {!loading && iconNode && iconPos === 'right' ? iconNode : null}
     </Pressable>
   );

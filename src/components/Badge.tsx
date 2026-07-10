@@ -24,7 +24,11 @@ export function Badge({
       accessible
       accessibilityRole="text"
       accessibilityLabel={accessibilityLabel ?? text}
-      style={[styles.badge, sizeStyles[size], { backgroundColor: severityColors[severity] }]}
+      style={[
+        styles.badge,
+        sizeStyles[size],
+        { backgroundColor: severityColors[severity] },
+      ]}
     >
       <Text
         numberOfLines={1}
@@ -48,13 +52,13 @@ const styles = StyleSheet.create({
 });
 
 const sizeStyles = StyleSheet.create({
-  small:  { minWidth: 16, height: 16, borderRadius: 8,  paddingHorizontal: 4 },
+  small: { minWidth: 16, height: 16, borderRadius: 8, paddingHorizontal: 4 },
   normal: { minWidth: 20, height: 20, borderRadius: 10, paddingHorizontal: 6 },
-  large:  { minWidth: 26, height: 26, borderRadius: 13, paddingHorizontal: 8 },
+  large: { minWidth: 26, height: 26, borderRadius: 13, paddingHorizontal: 8 },
 });
 
 const fontSizeStyles = StyleSheet.create({
-  small:  { fontSize: fontSize.small },
+  small: { fontSize: fontSize.small },
   normal: { fontSize: fontSize.default },
-  large:  { fontSize: fontSize.large },
+  large: { fontSize: fontSize.large },
 });
