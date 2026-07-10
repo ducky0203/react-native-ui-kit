@@ -57,7 +57,8 @@
   },
   "homepage": "https://github.com/ducky0203/react-native-ui-kit#readme",
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
   },
   "devDependencies": {
     "@eslint/compat": "^2.0.3",

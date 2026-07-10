@@ -13,9 +13,6 @@ concurrency:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
 
     steps:
       - name: Checkout
@@ -27,7 +24,7 @@ jobs:
       - name: Build package
         run: yarn prepare
 
-      - name: Publish to GitHub Packages
-        run: yarn npm publish
+      - name: Publish to npm
+        run: yarn npm publish --access public
         env:
-          PACKAGE_TOKEN: ${{ secrets.PACKAGE_TOKEN }}
+          YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
