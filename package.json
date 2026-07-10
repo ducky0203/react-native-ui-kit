@@ -48,17 +48,16 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ducpham/react-native-ui-kit.git"
+    "url": "git+https://github.com/ducky0203/react-native-ui-kit.git"
   },
-  "author": "ducpham <ducpham@users.noreply.github.com> (https://github.com/ducpham)",
+  "author": "ducpham <ducpham@users.noreply.github.com> (https://github.com/ducky0203)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ducpham/react-native-ui-kit/issues"
+    "url": "https://github.com/ducky0203/react-native-ui-kit/issues"
   },
-  "homepage": "https://github.com/ducpham/react-native-ui-kit#readme",
+  "homepage": "https://github.com/ducky0203/react-native-ui-kit#readme",
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/",
-    "access": "public"
+    "registry": "https://npm.pkg.github.com"
   },
   "devDependencies": {
     "@eslint/compat": "^2.0.3",
