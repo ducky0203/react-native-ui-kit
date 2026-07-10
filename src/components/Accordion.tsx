@@ -1,19 +1,31 @@
-import { useState, type ReactNode } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Pressable } from 'react-native-gesture-handler';
-import Animated, {
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import {
+  Animated,
   Easing,
-  FadeIn,
-  FadeOut,
-  LinearTransition,
-  useAnimatedStyle,
-  useDerivedValue,
-  withTiming,
-} from 'react-native-reanimated';
+  LayoutAnimation,
+  Platform,
+  Pressable,
+  StyleSheet,
+  UIManager,
+  View,
+} from 'react-native';
 import { Icon, type IconName } from './Icon';
 import { Typography } from './Typography';
 import { colors } from '../theme/colors';
 import { motionDuration } from '../theme/motion';
+
+if (
+  Platform.OS === 'android' &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+const LAYOUT_ANIMATION = LayoutAnimation.create(
+  motionDuration.layout,
+  LayoutAnimation.Types.easeInEaseOut,
+  LayoutAnimation.Properties.opacity
+);
 
 export type AccordionItem = {
   title: string;
@@ -28,22 +40,22 @@ export type AccordionProps = {
   defaultActiveIndices?: number[];
 };
 
-const ROW_TRANSITION = LinearTransition.duration(motionDuration.layout).easing(
-  Easing.out(Easing.cubic)
-);
-
 function Chevron({ open }: { open: boolean }) {
-  const rotation = useDerivedValue(() =>
-    withTiming(open ? 180 : 0, {
+  const rotation = useRef(new Animated.Value(open ? 1 : 0)).current;
+  useEffect(() => {
+    Animated.timing(rotation, {
+      toValue: open ? 1 : 0,
       duration: motionDuration.standard,
       easing: Easing.out(Easing.cubic),
-    })
-  );
-  const style = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${rotation.value}deg` }],
-  }));
+      useNativeDriver: true,
+    }).start();
+  }, [open, rotation]);
+  const rotate = rotation.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '180deg'],
+  });
   return (
-    <Animated.View style={style}>
+    <Animated.View style={{ transform: [{ rotate }] }}>
       <Icon name="chevron-down" size={20} color={colors.textMuted} />
     </Animated.View>
   );
@@ -57,6 +69,7 @@ export function Accordion({
   const [active, setActive] = useState<number[]>(defaultActiveIndices);
 
   const toggle = (index: number) => {
+    LayoutAnimation.configureNext(LAYOUT_ANIMATION);
     setActive((prev) => {
       if (prev.includes(index)) {
         return prev.filter((i) => i !== index);
@@ -70,9 +83,8 @@ export function Accordion({
       {items.map((item, index) => {
         const isOpen = active.includes(index);
         return (
-          <Animated.View
+          <View
             key={item.title}
-            layout={ROW_TRANSITION}
             style={[styles.item, index > 0 ? styles.itemBordered : null]}
           >
             <Pressable
@@ -93,16 +105,8 @@ export function Accordion({
               </Typography>
               <Chevron open={isOpen} />
             </Pressable>
-            {isOpen ? (
-              <Animated.View
-                entering={FadeIn.duration(motionDuration.fadeIn)}
-                exiting={FadeOut.duration(motionDuration.fadeOut)}
-                style={styles.body}
-              >
-                {item.content}
-              </Animated.View>
-            ) : null}
-          </Animated.View>
+            {isOpen ? <View style={styles.body}>{item.content}</View> : null}
+          </View>
         );
       })}
     </View>

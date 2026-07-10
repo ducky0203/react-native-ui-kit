@@ -1,11 +1,5 @@
-import { useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-  Easing,
-} from 'react-native-reanimated';
+import { useEffect, useRef } from 'react';
+import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
 import { colors, severityColors, type Severity } from '../theme/colors';
 import { motionDuration } from '../theme/motion';
 import { fontSize, getFontStyle } from '../theme/typography';
@@ -27,17 +21,21 @@ export function ProgressBar({
   const tone = severityColors[severity];
   const pct = Math.min(100, Math.max(0, value));
 
-  const progress = useSharedValue(pct);
+  const progress = useRef(new Animated.Value(pct)).current;
   useEffect(() => {
-    progress.value = withTiming(pct, {
+    Animated.timing(progress, {
+      toValue: pct,
       duration: motionDuration.progress,
       easing: Easing.out(Easing.cubic),
-    });
+      useNativeDriver: false,
+    }).start();
   }, [pct, progress]);
 
-  const fillStyle = useAnimatedStyle(() => ({
-    width: `${progress.value}%`,
-  }));
+  const width = progress.interpolate({
+    inputRange: [0, 100],
+    outputRange: ['0%', '100%'],
+    extrapolate: 'clamp',
+  });
 
   return (
     <View style={styles.container}>
@@ -52,8 +50,8 @@ export function ProgressBar({
             {
               backgroundColor: tone,
               borderRadius: height / 2,
+              width,
             },
-            fillStyle,
           ]}
         />
       </View>

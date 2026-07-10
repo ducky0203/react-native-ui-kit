@@ -1,45 +1,30 @@
 # react-native-ui-kit
 
-Thư viện component UI cho React Native — nút, form, danh sách, layout, feedback — kèm theme màu, icon Feather và animation qua Reanimated.
+Thư viện component UI cho React Native — nút, form, danh sách, layout, feedback — kèm theme màu, icon Feather và animation bằng API `Animated` thuần của React Native.
 
 ## Yêu cầu
 
 - React Native ≥ 0.75 (khuyến nghị 0.85+)
 - React 18+
-- [react-native-reanimated](https://docs.swmansion.com/react-native-reanimated/) ≥ 4
 - [react-native-safe-area-context](https://github.com/AppAndFlow/react-native-safe-area-context) ≥ 5
-- [react-native-gesture-handler](https://docs.swmansion.com/react-native-gesture-handler/) ≥ 2.24
 - [@react-native-vector-icons/feather](https://github.com/oblador/react-native-vector-icons) ≥ 13
+
+Animation dùng `Animated` và `LayoutAnimation` có sẵn trong React Native, không cần thư viện bên ngoài nào khác.
 
 ## Cài đặt
 
 ```sh
-yarn add react-native-ui-kit @react-native-vector-icons/feather react-native-gesture-handler react-native-reanimated react-native-safe-area-context
+yarn add react-native-ui-kit @react-native-vector-icons/feather react-native-safe-area-context
 # hoặc
-npm install react-native-ui-kit @react-native-vector-icons/feather react-native-gesture-handler react-native-reanimated react-native-safe-area-context
-```
-
-Cấu hình Reanimated theo [hướng dẫn chính thức](https://docs.swmansion.com/react-native-reanimated/docs/fundamentals/getting-started/#react-native-community-cli-projects). Với RN 0.85+, thêm plugin Worklets vào `babel.config.js` của app:
-
-```js
-module.exports = {
-  presets: ['module:@react-native/babel-preset'],
-  plugins: ['react-native-worklets/plugin'],
-};
+npm install react-native-ui-kit @react-native-vector-icons/feather react-native-safe-area-context
 ```
 
 ## Bắt đầu nhanh
 
-Import `react-native-gesture-handler` **đầu tiên** trong entry file (`index.js`), rồi bọc app bằng `GestureHandlerRootView`, `SafeAreaProvider` và `ToastProvider` (nếu dùng toast):
-
-```js
-// index.js
-import 'react-native-gesture-handler';
-```
+Bọc app bằng `SafeAreaProvider` và `ToastProvider` (nếu dùng toast):
 
 ```tsx
 import {
-  GestureHandlerRootView,
   SafeAreaProvider,
   ToastProvider,
   Screen,
@@ -49,16 +34,14 @@ import {
 
 export default function App() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <ToastProvider>
+    <SafeAreaProvider>
+      <ToastProvider>
         <Screen>
           <Typography variant="h1">Xin chào</Typography>
           <Button label="Nhấn tôi" severity="primary" onPress={() => {}} />
         </Screen>
-        </ToastProvider>
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+      </ToastProvider>
+    </SafeAreaProvider>
   );
 }
 ```
@@ -420,7 +403,7 @@ Entry point: `src/index.tsx` → publish qua field `exports` trong `package.json
 | Toast | `ToastProvider`, `useToast`, `showToast`, `Toast`, `ToastContainer`, `uiKitToastConfig` |
 | Theme | `configureTheme`, `colors`, `severityColors`, `getFontStyle` |
 | Types | `Severity`, `Colors`, `IconName`, tất cả `*Props` types |
-| Re-exports | `SafeAreaProvider`, `SafeAreaView`, `useSafeAreaInsets`, `GestureHandlerRootView`, `FeatherIcon` |
+| Re-exports | `SafeAreaProvider`, `SafeAreaView`, `useSafeAreaInsets`, `FeatherIcon` |
 
 Xem đầy đủ tại [`src/index.tsx`](./src/index.tsx).
 

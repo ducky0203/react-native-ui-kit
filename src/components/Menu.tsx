@@ -7,22 +7,18 @@ import {
   type ReactNode,
 } from 'react';
 import {
+  Animated,
   Dimensions,
+  Easing,
   Modal,
+  Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
-import { Pressable, ScrollView } from 'react-native-gesture-handler';
-import Animated, {
-  Easing,
-  useAnimatedStyle,
-  useDerivedValue,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
 import { Icon, type IconName } from './Icon';
 import { colors, severityColors, type Severity } from '../theme/colors';
 import { motionDuration } from '../theme/motion';
@@ -79,30 +75,40 @@ export function Menu({
   const [open, setOpen] = useState(false);
   const [anchor, setAnchor] = useState<Anchor | null>(null);
 
-  const caretRotation = useDerivedValue(() =>
-    withTiming(open ? 180 : 0, {
+  const caretRotation = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.timing(caretRotation, {
+      toValue: open ? 1 : 0,
       duration: motionDuration.micro,
       easing: Easing.out(Easing.cubic),
-    })
-  );
-  const caretStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${caretRotation.value}deg` }],
-  }));
+      useNativeDriver: true,
+    }).start();
+  }, [open, caretRotation]);
+  const caretStyle = {
+    transform: [
+      {
+        rotate: caretRotation.interpolate({
+          inputRange: [0, 1],
+          outputRange: ['0deg', '180deg'],
+        }),
+      },
+    ],
+  };
 
-  // Subtle scale + fade for the dropdown surface (modal handles backdrop fade).
-  const dropdownProgress = useSharedValue(0);
+  // Subtle fade for the dropdown surface (modal handles backdrop fade).
+  const dropdownProgress = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     if (open && anchor) {
-      dropdownProgress.value = 0;
-      dropdownProgress.value = withTiming(1, {
+      dropdownProgress.setValue(0);
+      Animated.timing(dropdownProgress, {
+        toValue: 1,
         duration: motionDuration.micro,
         easing: Easing.out(Easing.cubic),
-      });
+        useNativeDriver: true,
+      }).start();
     }
   }, [open, anchor, dropdownProgress]);
-  const dropdownAnimStyle = useAnimatedStyle(() => ({
-    opacity: dropdownProgress.value,
-  }));
+  const dropdownAnimStyle = { opacity: dropdownProgress };
 
   const openMenu = () => {
     if (disabled) {

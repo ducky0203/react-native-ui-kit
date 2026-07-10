@@ -1,12 +1,12 @@
 import type { ReactElement } from 'react';
 import {
   ActivityIndicator,
+  FlatList as RNFlatList,
   RefreshControl,
   StyleSheet,
   View,
   type FlatListProps as RNFlatListProps,
 } from 'react-native';
-import { FlatList as RNFlatList } from 'react-native-gesture-handler';
 import { EmptyState } from './EmptyState';
 import type { IconName } from './Icon';
 import { colors } from '../theme/colors';

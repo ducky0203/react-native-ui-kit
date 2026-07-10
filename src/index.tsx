@@ -102,5 +102,3 @@ export {
   SafeAreaView,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
-
-export { GestureHandlerRootView } from 'react-native-gesture-handler';

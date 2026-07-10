@@ -1,20 +1,16 @@
 import { useEffect, useRef, useState, type ComponentRef } from 'react';
 import {
+  Animated,
   Dimensions,
+  Easing,
   Modal,
+  Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
   type ViewStyle,
 } from 'react-native';
-import { Pressable, ScrollView } from 'react-native-gesture-handler';
-import Animated, {
-  Easing,
-  useAnimatedStyle,
-  useDerivedValue,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
 import { Icon } from './Icon';
 import { colors } from '../theme/colors';
 import { fontSize } from '../theme/typography';
@@ -61,29 +57,39 @@ export function Select<T>({
   const selected = options.find((option) => option.value === value);
   const message = invalid ? errorText : helperText;
 
-  const caretRotation = useDerivedValue(() =>
-    withTiming(open ? 180 : 0, {
+  const caretRotation = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.timing(caretRotation, {
+      toValue: open ? 1 : 0,
       duration: motionDuration.micro,
       easing: Easing.out(Easing.cubic),
-    })
-  );
-  const caretStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${caretRotation.value}deg` }],
-  }));
+      useNativeDriver: true,
+    }).start();
+  }, [open, caretRotation]);
+  const caretStyle = {
+    transform: [
+      {
+        rotate: caretRotation.interpolate({
+          inputRange: [0, 1],
+          outputRange: ['0deg', '180deg'],
+        }),
+      },
+    ],
+  };
 
-  const dropdownProgress = useSharedValue(0);
+  const dropdownProgress = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     if (open && anchor) {
-      dropdownProgress.value = 0;
-      dropdownProgress.value = withTiming(1, {
+      dropdownProgress.setValue(0);
+      Animated.timing(dropdownProgress, {
+        toValue: 1,
         duration: motionDuration.micro,
         easing: Easing.out(Easing.cubic),
-      });
+        useNativeDriver: true,
+      }).start();
     }
   }, [open, anchor, dropdownProgress]);
-  const dropdownAnimStyle = useAnimatedStyle(() => ({
-    opacity: dropdownProgress.value,
-  }));
+  const dropdownAnimStyle = { opacity: dropdownProgress };
 
   const openDropdown = () => {
     if (disabled) {

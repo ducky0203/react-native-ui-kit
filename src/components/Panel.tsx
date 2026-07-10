@@ -1,19 +1,31 @@
-import { useState, type ReactNode } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Pressable } from 'react-native-gesture-handler';
-import Animated, {
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import {
+  Animated,
   Easing,
-  FadeIn,
-  FadeOut,
-  LinearTransition,
-  useAnimatedStyle,
-  useDerivedValue,
-  withTiming,
-} from 'react-native-reanimated';
+  LayoutAnimation,
+  Platform,
+  Pressable,
+  StyleSheet,
+  UIManager,
+  View,
+} from 'react-native';
 import { Icon } from './Icon';
 import { Typography } from './Typography';
 import { colors } from '../theme/colors';
 import { motionDuration } from '../theme/motion';
+
+if (
+  Platform.OS === 'android' &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+const LAYOUT_ANIMATION = LayoutAnimation.create(
+  motionDuration.layout,
+  LayoutAnimation.Types.easeInEaseOut,
+  LayoutAnimation.Properties.opacity
+);
 
 export type PanelProps = {
   header?: string;
@@ -24,17 +36,21 @@ export type PanelProps = {
 };
 
 function Chevron({ collapsed }: { collapsed: boolean }) {
-  const rotation = useDerivedValue(() =>
-    withTiming(collapsed ? 0 : 180, {
+  const rotation = useRef(new Animated.Value(collapsed ? 0 : 1)).current;
+  useEffect(() => {
+    Animated.timing(rotation, {
+      toValue: collapsed ? 0 : 1,
       duration: motionDuration.standard,
       easing: Easing.out(Easing.cubic),
-    })
-  );
-  const style = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${rotation.value}deg` }],
-  }));
+      useNativeDriver: true,
+    }).start();
+  }, [collapsed, rotation]);
+  const rotate = rotation.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '180deg'],
+  });
   return (
-    <Animated.View style={style}>
+    <Animated.View style={{ transform: [{ rotate }] }}>
       <Icon name="chevron-down" size={20} color={colors.textMuted} />
     </Animated.View>
   );
@@ -49,6 +65,7 @@ export function Panel({
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
 
   const toggle = () => {
+    LayoutAnimation.configureNext(LAYOUT_ANIMATION);
     setCollapsed((value) => !value);
   };
 
@@ -59,12 +76,7 @@ export function Panel({
   ) : null;
 
   return (
-    <Animated.View
-      layout={LinearTransition.duration(motionDuration.layout).easing(
-        Easing.out(Easing.cubic)
-      )}
-      style={styles.panel}
-    >
+    <View style={styles.panel}>
       {header ? (
         toggleable ? (
           <Pressable
@@ -81,16 +93,8 @@ export function Panel({
           <View style={styles.header}>{title}</View>
         )
       ) : null}
-      {collapsed ? null : (
-        <Animated.View
-          entering={FadeIn.duration(motionDuration.fadeIn)}
-          exiting={FadeOut.duration(motionDuration.fadeOut)}
-          style={styles.body}
-        >
-          {children}
-        </Animated.View>
-      )}
-    </Animated.View>
+      {collapsed ? null : <View style={styles.body}>{children}</View>}
+    </View>
   );
 }
 

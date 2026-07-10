@@ -1,7 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { View } from 'react-native';
 import {
-  GestureHandlerRootView,
   SafeAreaProvider,
   ToastProvider,
 } from '@ducky0203/react-native-ui-kit';
@@ -18,7 +18,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <View style={{ flex: 1 }}>
       <SafeAreaProvider>
         <ToastProvider>
           <NavigationContainer>
@@ -62,6 +62,6 @@ export default function App() {
           </NavigationContainer>
         </ToastProvider>
       </SafeAreaProvider>
-    </GestureHandlerRootView>
+    </View>
   );
 }

@@ -9,8 +9,3 @@ export const motionDuration = {
   layout: 320,
   progress: 520,
 } as const;
-
-/** Spring presets that settle smoothly on 60Hz without harsh overshoot. */
-export const motionSpring = {
-  settle: { stiffness: 160, damping: 26, mass: 0.8 },
-} as const;

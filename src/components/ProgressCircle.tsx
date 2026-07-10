@@ -1,12 +1,12 @@
-import { useEffect } from 'react';
-import { StyleSheet, Text, View, type ViewStyle } from 'react-native';
-import Animated, {
+import { useEffect, useRef } from 'react';
+import {
+  Animated,
   Easing,
-  useAnimatedStyle,
-  useDerivedValue,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
+  StyleSheet,
+  Text,
+  View,
+  type ViewStyle,
+} from 'react-native';
 import { colors, severityColors, type Severity } from '../theme/colors';
 import { motionDuration } from '../theme/motion';
 import { fontSize } from '../theme/typography';
@@ -32,33 +32,41 @@ export function ProgressCircle({
   const radius = size / 2;
 
   // `progress` is the live, animated 0-100 value driving both half-rings.
-  const progress = useSharedValue(pct);
+  const progress = useRef(new Animated.Value(pct)).current;
   useEffect(() => {
-    progress.value = withTiming(pct, {
+    Animated.timing(progress, {
+      toValue: pct,
       duration: motionDuration.progress,
       easing: Easing.out(Easing.cubic),
-    });
+      useNativeDriver: true,
+    }).start();
   }, [pct, progress]);
 
   // Each colored layer is a ring with two adjacent sides painted (a 180deg
   // arc once rotated +45deg). A half-width clip reveals only the wanted part.
-  const rightRotation = useDerivedValue(() => {
-    const angle = (progress.value / 100) * 360;
-    return progress.value <= 50 ? angle - 180 : 0;
+  // Right ring sweeps 0-50% then parks; left ring sweeps the full range and
+  // only becomes visible past the halfway point.
+  const rightRotate = progress.interpolate({
+    inputRange: [0, 50, 100],
+    outputRange: ['-135deg', '45deg', '45deg'],
+    extrapolate: 'clamp',
   });
-  const leftRotation = useDerivedValue(() => {
-    const angle = (progress.value / 100) * 360;
-    return angle - 180;
+  const leftRotate = progress.interpolate({
+    inputRange: [0, 100],
+    outputRange: ['-135deg', '225deg'],
+    extrapolate: 'clamp',
   });
-  const leftVisible = useDerivedValue(() => (progress.value > 50 ? 1 : 0));
+  const leftOpacity = progress.interpolate({
+    inputRange: [0, 50, 50.0001, 100],
+    outputRange: [0, 0, 1, 1],
+    extrapolate: 'clamp',
+  });
 
-  const rightStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${45 + rightRotation.value}deg` }],
-  }));
-  const leftStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${45 + leftRotation.value}deg` }],
-    opacity: leftVisible.value,
-  }));
+  const rightStyle = { transform: [{ rotate: rightRotate }] };
+  const leftStyle = {
+    transform: [{ rotate: leftRotate }],
+    opacity: leftOpacity,
+  };
 
   const ringBase: ViewStyle = {
     width: size,

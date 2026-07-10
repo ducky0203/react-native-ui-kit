@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { StyleSheet, View, type LayoutChangeEvent } from 'react-native';
-import { Pressable, ScrollView } from 'react-native-gesture-handler';
-import Animated, {
+import {
+  Animated,
   Easing,
-  FadeIn,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+  type LayoutChangeEvent,
+} from 'react-native';
 import { Icon, type IconName } from './Icon';
 import { Typography } from './Typography';
 import { colors } from '../theme/colors';
@@ -31,8 +31,10 @@ export function TabView({ tabs, defaultIndex = 0, onChange }: TabViewProps) {
   const [index, setIndex] = useState(defaultIndex);
   const layoutsRef = useRef<Array<TabLayout | undefined>>([]);
 
-  const indicatorX = useSharedValue(0);
-  const indicatorWidth = useSharedValue(0);
+  const indicatorX = useRef(new Animated.Value(0)).current;
+  const indicatorWidth = useRef(new Animated.Value(0)).current;
+  const placedRef = useRef(false);
+  const contentOpacity = useRef(new Animated.Value(1)).current;
 
   const moveIndicator = (target: number) => {
     const layout = layoutsRef.current[target];
@@ -42,14 +44,25 @@ export function TabView({ tabs, defaultIndex = 0, onChange }: TabViewProps) {
     const config = {
       duration: motionDuration.standard,
       easing: Easing.out(Easing.cubic),
+      useNativeDriver: false,
     };
-    indicatorX.value = withTiming(layout.x, config);
-    indicatorWidth.value = withTiming(layout.width, config);
+    Animated.parallel([
+      Animated.timing(indicatorX, { toValue: layout.x, ...config }),
+      Animated.timing(indicatorWidth, { toValue: layout.width, ...config }),
+    ]).start();
   };
 
   const select = (next: number) => {
     setIndex(next);
     moveIndicator(next);
+    // Fade the panel content in on each tab change.
+    contentOpacity.setValue(0);
+    Animated.timing(contentOpacity, {
+      toValue: 1,
+      duration: motionDuration.fadeIn,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
     onChange?.(next);
   };
 
@@ -59,9 +72,10 @@ export function TabView({ tabs, defaultIndex = 0, onChange }: TabViewProps) {
     if (i === index) {
       // Initial placement (no animation) so the indicator sits under the active
       // tab on first paint without sliding from 0.
-      if (indicatorWidth.value === 0) {
-        indicatorX.value = x;
-        indicatorWidth.value = width;
+      if (!placedRef.current) {
+        placedRef.current = true;
+        indicatorX.setValue(x);
+        indicatorWidth.setValue(width);
       } else {
         moveIndicator(i);
       }
@@ -74,10 +88,10 @@ export function TabView({ tabs, defaultIndex = 0, onChange }: TabViewProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
 
-  const indicatorStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: indicatorX.value }],
-    width: indicatorWidth.value,
-  }));
+  const indicatorStyle = {
+    transform: [{ translateX: indicatorX }],
+    width: indicatorWidth,
+  };
 
   const active = tabs[index];
 
@@ -122,12 +136,7 @@ export function TabView({ tabs, defaultIndex = 0, onChange }: TabViewProps) {
       </View>
       <View style={styles.panel}>
         {active ? (
-          <Animated.View
-            key={index}
-            entering={FadeIn.duration(motionDuration.fadeIn).easing(
-              Easing.out(Easing.cubic)
-            )}
-          >
+          <Animated.View key={index} style={{ opacity: contentOpacity }}>
             {active.content}
           </Animated.View>
         ) : null}
