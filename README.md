@@ -14,9 +14,9 @@ Animation dùng `Animated` và `LayoutAnimation` có sẵn trong React Native, k
 ## Cài đặt
 
 ```sh
-yarn add react-native-ui-kit @react-native-vector-icons/feather react-native-safe-area-context
+yarn add @ducky0203/react-native-ui-kit @react-native-vector-icons/feather react-native-safe-area-context
 # hoặc
-npm install react-native-ui-kit @react-native-vector-icons/feather react-native-safe-area-context
+npm install @ducky0203/react-native-ui-kit @react-native-vector-icons/feather react-native-safe-area-context
 ```
 
 ## Bắt đầu nhanh
@@ -30,7 +30,7 @@ import {
   Screen,
   Button,
   Typography,
-} from 'react-native-ui-kit';
+} from '@ducky0203/react-native-ui-kit';
 
 export default function App() {
   return (
@@ -260,7 +260,7 @@ const options = [
 Dựa trên [react-native-toast-message-ts](https://github.com/noorjsdivs/react-native-toast-message-ts) (MIT) — stack animation, swipe dismiss, expand stack. Style theo UI kit (Feather icons, theme colors).
 
 ```tsx
-import { useToast, Toast, ToastContainer, uiKitToastConfig } from 'react-native-ui-kit';
+import { useToast, Toast, ToastContainer, uiKitToastConfig } from '@ducky0203/react-native-ui-kit';
 
 function MyScreen() {
   const toast = useToast();
@@ -288,7 +288,7 @@ Toast.show({ type: 'info', text1: 'Hello' });
 Gọi `configureTheme` **một lần** ở entry point (trước khi render bất kỳ component nào):
 
 ```tsx
-import { configureTheme } from 'react-native-ui-kit';
+import { configureTheme } from '@ducky0203/react-native-ui-kit';
 
 configureTheme({
   colors: {
@@ -323,7 +323,7 @@ Chỉ cần truyền các key muốn override — phần còn lại giữ nguyê
 #### Dùng trực tiếp trong app
 
 ```tsx
-import { colors, severityColors, type Severity } from 'react-native-ui-kit';
+import { colors, severityColors, type Severity } from '@ducky0203/react-native-ui-kit';
 
 // Sau khi configureTheme chạy, object này đã được cập nhật
 const style = { color: colors.primary };
@@ -394,6 +394,19 @@ Cấu trúc output:
 - `lib/typescript/` — khai báo TypeScript
 
 Entry point: `src/index.tsx` → publish qua field `exports` trong `package.json`.
+
+## Publish lên npm
+
+Publish thủ công (không qua CI):
+
+```sh
+npm login                # đăng nhập npmjs.org (một lần)
+npm version patch        # minor / major tùy thay đổi
+npm run release          # clean → build → npm publish
+git push --follow-tags   # đẩy commit + tag version lên GitHub
+```
+
+Script `release` chạy `clean` → `build` (bob) → `npm publish`. Chỉ các file khai báo trong `files` (`lib`, native folders…) được ship, `src` bị loại. Cấu hình registry & quyền truy cập lấy từ `publishConfig` (npmjs.org, `access: public`).
 
 ## API export
 
