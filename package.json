@@ -1,6 +1,6 @@
 {
   "name": "@ducky0203/react-native-ui-kit",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A React Native UI kit library",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
