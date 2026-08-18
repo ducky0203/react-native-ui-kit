@@ -12,7 +12,7 @@ export type ScreenProps = {
 export function Screen({
   children,
   style,
-  edges = ['top', 'right', 'bottom', 'left'],
+  edges = [],
   backgroundColor = '#ffffff',
 }: ScreenProps) {
   return (
