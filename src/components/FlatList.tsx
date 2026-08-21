@@ -4,10 +4,8 @@ import {
   FlatList as RNFlatList,
   RefreshControl,
   StyleSheet,
-  useWindowDimensions,
   View,
   type FlatListProps as RNFlatListProps,
-  type LayoutChangeEvent,
 } from 'react-native';
 import { EmptyState } from './EmptyState';
 import type { IconName } from './Icon';
@@ -59,13 +57,10 @@ export function FlatList<ItemT>({
   data,
   onEndReachedThreshold = 0.1,
   contentContainerStyle,
-  onLayout,
   ...rest
 }: FlatListProps<ItemT>) {
-  const { height: windowHeight } = useWindowDimensions();
-  const [viewportHeight, setViewportHeight] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
-  const spacerHeight = (viewportHeight || windowHeight) / 2;
+  const spacerHeight = 80;
 
   const hasData = (data?.length ?? 0) > 0;
 
@@ -84,17 +79,11 @@ export function FlatList<ItemT>({
     }
   };
 
-  const handleLayout = (event: LayoutChangeEvent) => {
-    setViewportHeight(event.nativeEvent.layout.height);
-    onLayout?.(event);
-  };
-
   return (
     <RNFlatList<ItemT>
       {...rest}
       data={data}
       contentContainerStyle={[styles.content, contentContainerStyle]}
-      onLayout={handleLayout}
       onEndReached={onLoadMore ? handleEndReached : undefined}
       onEndReachedThreshold={onEndReachedThreshold}
       refreshControl={

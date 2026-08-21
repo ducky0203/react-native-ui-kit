@@ -4,9 +4,7 @@ import {
   RefreshControl,
   SectionList as RNSectionList,
   StyleSheet,
-  useWindowDimensions,
   View,
-  type LayoutChangeEvent,
   type SectionBase,
   type SectionListProps as RNSectionListProps,
 } from 'react-native';
@@ -60,13 +58,10 @@ export function SectionList<ItemT, SectionT = unknown>({
   sections,
   onEndReachedThreshold = 0.1,
   contentContainerStyle,
-  onLayout,
   ...rest
 }: SectionListProps<ItemT, SectionT>) {
-  const { height: windowHeight } = useWindowDimensions();
-  const [viewportHeight, setViewportHeight] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
-  const spacerHeight = (viewportHeight || windowHeight) / 2;
+  const spacerHeight = 80;
 
   const hasData = (sections as ReadonlyArray<SectionBase<ItemT>>).some(
     (section) => section.data.length > 0
@@ -87,17 +82,11 @@ export function SectionList<ItemT, SectionT = unknown>({
     }
   };
 
-  const handleLayout = (event: LayoutChangeEvent) => {
-    setViewportHeight(event.nativeEvent.layout.height);
-    onLayout?.(event);
-  };
-
   return (
     <RNSectionList<ItemT, SectionT>
       {...rest}
       sections={sections}
       contentContainerStyle={[styles.content, contentContainerStyle]}
-      onLayout={handleLayout}
       onEndReached={onLoadMore ? handleEndReached : undefined}
       onEndReachedThreshold={onEndReachedThreshold}
       refreshControl={
