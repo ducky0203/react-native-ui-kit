@@ -12,25 +12,24 @@ const makeItems = (start: number, count: number): number[] =>
 
 export function ListsScreen() {
   const [items, setItems] = useState<number[]>(() => makeItems(0, 20));
-  const [refreshing, setRefreshing] = useState(false);
-  const [loadingMore, setLoadingMore] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const onRefresh = () => {
-    setRefreshing(true);
-    setTimeout(() => {
-      setItems(makeItems(0, 20));
-      setRefreshing(false);
-    }, 1200);
-  };
+  const onRefresh = () =>
+    new Promise<void>((resolve) => {
+      setTimeout(() => {
+        setItems(makeItems(0, 20));
+        resolve();
+      }, 1200);
+    });
 
   const onLoadMore = () => {
-    if (loadingMore || items.length >= 60) {
+    if (loading || items.length >= 60) {
       return;
     }
-    setLoadingMore(true);
+    setLoading(true);
     setTimeout(() => {
       setItems((prev) => [...prev, ...makeItems(prev.length, 20)]);
-      setLoadingMore(false);
+      setLoading(false);
     }, 1200);
   };
 
@@ -43,12 +42,19 @@ export function ListsScreen() {
           <Typography variant={'caption'}>Item #{item + 1}</Typography>
         </View>
       )}
-      refreshing={refreshing}
       onRefresh={onRefresh}
-      loadingMore={loadingMore}
+      loading={loading}
+      canLoadMore={items.length < 60}
       onLoadMore={onLoadMore}
       emptyText="Chưa có dữ liệu"
       emptyIcon="inbox"
+      footerComponent={
+        <View style={styles.footer}>
+          <Typography variant={'caption'} style={styles.footerText}>
+            Footer cao 1/2 màn hình
+          </Typography>
+        </View>
+      }
       ListHeaderComponent={
         <View style={styles.header}>
           <Button
@@ -65,6 +71,15 @@ export function ListsScreen() {
 }
 
 const styles = StyleSheet.create({
+  footer: {
+    width: '100%',
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    paddingTop: 12,
+  },
+  footerText: {
+    textAlign: 'center',
+  },
   row: {
     paddingHorizontal: 16,
     paddingVertical: 14,

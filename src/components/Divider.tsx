@@ -3,6 +3,7 @@ import {
   Text,
   View,
   type StyleProp,
+  type TextStyle,
   type ViewStyle,
 } from 'react-native';
 import { colors } from '../theme/colors';
@@ -12,9 +13,15 @@ export type DividerProps = {
   layout?: 'horizontal' | 'vertical';
   label?: string;
   style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
 };
 
-export function Divider({ layout = 'horizontal', label, style }: DividerProps) {
+export function Divider({
+  layout = 'horizontal',
+  label,
+  style,
+  textStyle,
+}: DividerProps) {
   if (layout === 'vertical') {
     return <View style={[styles.vertical, style]} />;
   }
@@ -23,7 +30,7 @@ export function Divider({ layout = 'horizontal', label, style }: DividerProps) {
     return (
       <View style={[styles.labelRow, style]}>
         <View style={styles.line} />
-        <Text style={[styles.label, getFontStyle()]}>{label}</Text>
+        <Text style={[styles.label, getFontStyle(), textStyle]}>{label}</Text>
         <View style={styles.line} />
       </View>
     );

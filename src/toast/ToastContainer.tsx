@@ -28,6 +28,7 @@ import { ErrorToast } from './components/ErrorToast';
 import { InfoToast } from './components/InfoToast';
 import { WarningToast } from './components/WarningToast';
 import { BaseToast } from './components/BaseToast';
+import { fontSize, getFontStyle } from '../theme/typography';
 
 export interface ToastContainerProps {
   config?: ToastConfig;
@@ -377,7 +378,7 @@ export const ToastContainer: React.FC<ToastContainerProps> = ({
           onPress={handleCloseAll}
           activeOpacity={0.8}
         >
-          <Text style={styles.closeAllText}>Close All</Text>
+          <Text style={[styles.closeAllText, getFontStyle()]}>Close All</Text>
         </TouchableOpacity>
       )}
     </View>
@@ -406,7 +407,7 @@ const styles = StyleSheet.create({
   },
   closeAllText: {
     color: '#FFF',
-    fontSize: 12,
+    fontSize: fontSize.small,
     fontWeight: '600',
   },
 });

@@ -1,5 +1,14 @@
 import { useEffect, useRef } from 'react';
-import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
+import {
+  Animated,
+  Easing,
+  StyleSheet,
+  Text,
+  View,
+  type StyleProp,
+  type TextStyle,
+  type ViewStyle,
+} from 'react-native';
 import { colors, severityColors, type Severity } from '../theme/colors';
 import { motionDuration } from '../theme/motion';
 import { fontSize, getFontStyle } from '../theme/typography';
@@ -10,6 +19,8 @@ export type ProgressBarProps = {
   severity?: Severity;
   showValue?: boolean;
   height?: number;
+  style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
 };
 
 export function ProgressBar({
@@ -17,6 +28,8 @@ export function ProgressBar({
   severity = 'primary',
   showValue = false,
   height = 8,
+  style,
+  textStyle,
 }: ProgressBarProps) {
   const tone = severityColors[severity];
   const pct = Math.min(100, Math.max(0, value));
@@ -38,7 +51,7 @@ export function ProgressBar({
   });
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, style]}>
       <View
         accessibilityRole="progressbar"
         accessibilityValue={{ min: 0, max: 100, now: Math.round(pct) }}
@@ -56,7 +69,9 @@ export function ProgressBar({
         />
       </View>
       {showValue ? (
-        <Text style={[styles.value, getFontStyle()]}>{Math.round(pct)}%</Text>
+        <Text style={[styles.value, getFontStyle(), textStyle]}>
+          {Math.round(pct)}%
+        </Text>
       ) : null}
     </View>
   );

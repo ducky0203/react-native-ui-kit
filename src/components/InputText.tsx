@@ -6,10 +6,12 @@ import {
   View,
   type StyleProp,
   type TextInputProps,
+  type TextStyle,
   type ViewStyle,
 } from 'react-native';
 import { colors } from '../theme/colors';
-import { fontSize, getFontStyle } from '../theme/typography';
+import { fontSize, lineHeight, getFontStyle } from '../theme/typography';
+import { control } from '../theme/sizing';
 
 export type InputTextProps = {
   label?: string;
@@ -24,7 +26,11 @@ export type InputTextProps = {
   keyboardType?: TextInputProps['keyboardType'];
   autoCapitalize?: TextInputProps['autoCapitalize'];
   multiline?: boolean;
+  /** Style of the outer wrapper (label + field + message). */
   style?: StyleProp<ViewStyle>;
+  /** Style of the field itself, including its text. */
+  inputStyle?: StyleProp<TextStyle>;
+  labelStyle?: StyleProp<TextStyle>;
 };
 
 export function InputText({
@@ -41,6 +47,8 @@ export function InputText({
   autoCapitalize,
   multiline = false,
   style,
+  inputStyle,
+  labelStyle,
 }: InputTextProps) {
   const [focused, setFocused] = useState(false);
   const message = invalid ? errorText : helperText;
@@ -54,7 +62,7 @@ export function InputText({
   return (
     <View style={[styles.container, style]}>
       {label ? (
-        <Text style={[styles.label, getFontStyle()]}>{label}</Text>
+        <Text style={[styles.label, getFontStyle(), labelStyle]}>{label}</Text>
       ) : null}
       <TextInput
         value={value}
@@ -77,6 +85,7 @@ export function InputText({
           multiline ? styles.multiline : null,
           disabled ? styles.disabled : null,
           getFontStyle(),
+          inputStyle,
         ]}
       />
       {message ? (
@@ -105,16 +114,22 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   input: {
-    borderWidth: 1.5,
-    borderRadius: 3,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    height: control.height,
+    borderWidth: control.borderWidth,
+    borderRadius: control.borderRadius,
+    paddingHorizontal: control.paddingHorizontal,
+    paddingVertical: control.paddingVertical,
     fontSize: fontSize.default,
+    // Single-line inputs intentionally have no lineHeight: iOS offsets the text
+    // downwards when it is set, breaking alignment with Select's value label.
+    textAlignVertical: 'center',
     color: colors.text,
     backgroundColor: colors.surface,
   },
   multiline: {
+    height: undefined,
     minHeight: 96,
+    lineHeight: lineHeight.default,
     textAlignVertical: 'top',
   },
   disabled: {

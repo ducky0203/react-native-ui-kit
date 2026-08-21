@@ -5,11 +5,13 @@ import {
   StyleSheet,
   Text,
   View,
+  type StyleProp,
+  type TextStyle,
   type ViewStyle,
 } from 'react-native';
 import { colors, severityColors, type Severity } from '../theme/colors';
 import { motionDuration } from '../theme/motion';
-import { fontSize } from '../theme/typography';
+import { fontSize, getFontStyle } from '../theme/typography';
 
 export type ProgressCircleProps = {
   /** Progress value, 0-100. */
@@ -18,6 +20,8 @@ export type ProgressCircleProps = {
   strokeWidth?: number;
   severity?: Severity;
   showValue?: boolean;
+  style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
 };
 
 export function ProgressCircle({
@@ -26,6 +30,8 @@ export function ProgressCircle({
   strokeWidth = 8,
   severity = 'primary',
   showValue = true,
+  style,
+  textStyle,
 }: ProgressCircleProps) {
   const tone = severityColors[severity];
   const pct = Math.min(100, Math.max(0, value));
@@ -82,7 +88,7 @@ export function ProgressCircle({
     <View
       accessibilityRole="progressbar"
       accessibilityValue={{ min: 0, max: 100, now: Math.round(pct) }}
-      style={{ width: size, height: size }}
+      style={[{ width: size, height: size }, style]}
     >
       <View
         style={[
@@ -113,7 +119,9 @@ export function ProgressCircle({
 
       {showValue ? (
         <View style={styles.center}>
-          <Text style={styles.value}>{Math.round(pct)}%</Text>
+          <Text style={[styles.value, getFontStyle(), textStyle]}>
+            {Math.round(pct)}%
+          </Text>
         </View>
       ) : null}
     </View>

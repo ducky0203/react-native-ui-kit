@@ -22,9 +22,21 @@ export type TypographyProps = {
 };
 
 const variantStyles: Record<TypographyVariant, TextStyle> = {
-  h1: { fontSize: 28, lineHeight: 40, fontWeight: '700' },
-  h2: { fontSize: 24, lineHeight: 36, fontWeight: '700' },
-  h3: { fontSize: 20, lineHeight: 28, fontWeight: '600' },
+  h1: {
+    fontSize: fontSize.h1,
+    lineHeight: lineHeight.h1,
+    fontWeight: '700',
+  },
+  h2: {
+    fontSize: fontSize.h2,
+    lineHeight: lineHeight.h2,
+    fontWeight: '700',
+  },
+  h3: {
+    fontSize: fontSize.h3,
+    lineHeight: lineHeight.h3,
+    fontWeight: '600',
+  },
   h4: {
     fontSize: fontSize.default,
     lineHeight: lineHeight.default,

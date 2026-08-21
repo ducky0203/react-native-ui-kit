@@ -1,13 +1,22 @@
-import { StyleSheet, Text, View } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  type StyleProp,
+  type TextStyle,
+  type ViewStyle,
+} from 'react-native';
 import { Icon, type IconName } from './Icon';
 import { colors, severityColors, type Severity } from '../theme/colors';
-import { fontSize, getFontStyle } from '../theme/typography';
+import { fontSize, getFontStyle, lineHeight } from '../theme/typography';
 
 export type TagProps = {
   value?: string;
   severity?: Severity;
   icon?: IconName;
   rounded?: boolean;
+  style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
 };
 
 export function Tag({
@@ -15,6 +24,8 @@ export function Tag({
   severity = 'primary',
   icon,
   rounded = false,
+  style,
+  textStyle,
 }: TagProps) {
   return (
     <View
@@ -25,11 +36,12 @@ export function Tag({
         styles.tag,
         rounded ? styles.tagRounded : styles.tagSquare,
         { backgroundColor: severityColors[severity] },
+        style,
       ]}
     >
-      {icon ? <Icon name={icon} size={12} color={colors.textInverse} /> : null}
+      {icon ? <Icon name={icon} size={11} color={colors.textInverse} /> : null}
       {value ? (
-        <Text style={[styles.text, getFontStyle()]}>{value}</Text>
+        <Text style={[styles.text, getFontStyle(), textStyle]}>{value}</Text>
       ) : null}
     </View>
   );
@@ -40,15 +52,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+    gap: 3,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
   },
   tagRounded: { borderRadius: 999 },
   tagSquare: { borderRadius: 3 },
   text: {
-    fontSize: fontSize.default,
-    fontWeight: '700',
+    fontSize: fontSize.small,
+    lineHeight: lineHeight.small,
+    fontWeight: '600',
     color: colors.textInverse,
   },
 });

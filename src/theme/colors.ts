@@ -13,6 +13,7 @@ export type Colors = {
   info: string;
   warning: string;
   danger: string;
+  background: string;
   surface: string;
   surfaceMuted: string;
   border: string;
@@ -29,6 +30,7 @@ export const colors: Colors = {
   warning: '#F59E0B',
   danger: '#EF4444',
 
+  background: '#FFFFFF',
   surface: '#FFFFFF',
   surfaceMuted: '#F1F5F9',
   border: '#E2E8F0',

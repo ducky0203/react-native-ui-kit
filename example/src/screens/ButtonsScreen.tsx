@@ -30,6 +30,7 @@ export function ButtonsScreen() {
 
       <Typography variant="h4">Size</Typography>
       <View style={styles.row}>
+        <Button label="Smallest" size="smallest" />
         <Button label="Small" size="small" />
         <Button label="Normal" size="normal" />
         <Button label="Large" size="large" />

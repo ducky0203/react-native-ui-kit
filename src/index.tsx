@@ -95,6 +95,8 @@ export type { Colors, Severity } from './theme/colors';
 
 export { fontSize, lineHeight, getFontStyle } from './theme/typography';
 
+export { control, controlHeight } from './theme/sizing';
+
 export { Feather as FeatherIcon } from '@react-native-vector-icons/feather/static';
 
 export {

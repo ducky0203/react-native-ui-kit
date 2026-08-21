@@ -8,6 +8,9 @@ import {
   StyleSheet,
   UIManager,
   View,
+  type StyleProp,
+  type TextStyle,
+  type ViewStyle,
 } from 'react-native';
 import { Icon, type IconName } from './Icon';
 import { Typography } from './Typography';
@@ -38,6 +41,9 @@ export type AccordionProps = {
   /** Allow multiple sections open at once. */
   multiple?: boolean;
   defaultActiveIndices?: number[];
+  style?: StyleProp<ViewStyle>;
+  /** Style of the section titles. */
+  textStyle?: StyleProp<TextStyle>;
 };
 
 function Chevron({ open }: { open: boolean }) {
@@ -65,6 +71,8 @@ export function Accordion({
   items,
   multiple = false,
   defaultActiveIndices = [],
+  style,
+  textStyle,
 }: AccordionProps) {
   const [active, setActive] = useState<number[]>(defaultActiveIndices);
 
@@ -79,7 +87,7 @@ export function Accordion({
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, style]}>
       {items.map((item, index) => {
         const isOpen = active.includes(index);
         return (
@@ -100,7 +108,7 @@ export function Accordion({
               {item.icon ? (
                 <Icon name={item.icon} size={18} color={colors.primary} />
               ) : null}
-              <Typography variant="label" style={styles.title}>
+              <Typography variant="label" style={[styles.title, textStyle]}>
                 {item.title}
               </Typography>
               <Chevron open={isOpen} />

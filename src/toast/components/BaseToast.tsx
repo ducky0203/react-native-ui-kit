@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import type { BaseToastProps, ToastIconConfig } from '../types';
 import { colors } from '../../theme/colors';
-import { fontSize } from '../../theme/typography';
+import { fontSize, getFontStyle } from '../../theme/typography';
 
 interface ExtendedBaseToastProps extends BaseToastProps {
   onClose?: () => void;
@@ -52,7 +52,7 @@ export const BaseToast: React.FC<ExtendedBaseToastProps> = ({
       <View style={[styles.contentContainer, contentContainerStyle]}>
         {text1 ? (
           <Text
-            style={[styles.text1, text1Style]}
+            style={[styles.text1, getFontStyle(), text1Style]}
             numberOfLines={text1NumberOfLines}
           >
             {text1}
@@ -60,7 +60,7 @@ export const BaseToast: React.FC<ExtendedBaseToastProps> = ({
         ) : null}
         {text2 ? (
           <Text
-            style={[styles.text2, text2Style]}
+            style={[styles.text2, getFontStyle(), text2Style]}
             numberOfLines={text2NumberOfLines}
           >
             {text2}

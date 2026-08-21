@@ -60,6 +60,9 @@ export function FormScreen() {
           placeholder="Tap to choose a role"
           value={role}
           onChange={setRole}
+          filter
+          filterPlaceholder="Tìm role"
+          emptyFilterMessage="Không có role nào khớp"
           options={[
             { label: 'Developer', value: 'dev' },
             { label: 'Designer', value: 'design' },

@@ -1,5 +1,11 @@
 import type { ReactNode } from 'react';
-import { StyleSheet, View } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  type StyleProp,
+  type TextStyle,
+  type ViewStyle,
+} from 'react-native';
 import { Icon, type IconName } from './Icon';
 import { Typography } from './Typography';
 import { colors } from '../theme/colors';
@@ -9,6 +15,9 @@ export type EmptyStateProps = {
   title?: string;
   description?: string;
   action?: ReactNode;
+  style?: StyleProp<ViewStyle>;
+  titleStyle?: StyleProp<TextStyle>;
+  descriptionStyle?: StyleProp<TextStyle>;
 };
 
 export function EmptyState({
@@ -16,21 +25,26 @@ export function EmptyState({
   title = 'No data',
   description,
   action,
+  style,
+  titleStyle,
+  descriptionStyle,
 }: EmptyStateProps) {
   return (
     <View
       accessible
       accessibilityRole="text"
       accessibilityLabel={[title, description].filter(Boolean).join('. ')}
-      style={styles.container}
+      style={[styles.container, style]}
     >
       <Icon name={icon} size={48} color={colors.textMuted} />
-      <Typography variant="h4">{title}</Typography>
+      <Typography variant="h4" style={titleStyle}>
+        {title}
+      </Typography>
       {description ? (
         <Typography
           variant="bodySmall"
           color={colors.textMuted}
-          style={styles.description}
+          style={[styles.description, descriptionStyle]}
         >
           {description}
         </Typography>

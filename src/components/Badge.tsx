@@ -1,4 +1,11 @@
-import { StyleSheet, Text, View } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  type StyleProp,
+  type TextStyle,
+  type ViewStyle,
+} from 'react-native';
 import { colors, severityColors, type Severity } from '../theme/colors';
 import { fontSize, getFontStyle } from '../theme/typography';
 
@@ -9,6 +16,8 @@ export type BadgeProps = {
   severity?: Severity;
   size?: BadgeSize;
   accessibilityLabel?: string;
+  style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
 };
 
 export function Badge({
@@ -16,6 +25,8 @@ export function Badge({
   severity = 'primary',
   size = 'normal',
   accessibilityLabel,
+  style,
+  textStyle,
 }: BadgeProps) {
   const text = value != null ? String(value) : '';
 
@@ -28,11 +39,12 @@ export function Badge({
         styles.badge,
         sizeStyles[size],
         { backgroundColor: severityColors[severity] },
+        style,
       ]}
     >
       <Text
         numberOfLines={1}
-        style={[styles.text, fontSizeStyles[size], getFontStyle()]}
+        style={[styles.text, textSizeStyles[size], getFontStyle(), textStyle]}
       >
         {text}
       </Text>
@@ -57,8 +69,10 @@ const sizeStyles = StyleSheet.create({
   large: { minWidth: 26, height: 26, borderRadius: 13, paddingHorizontal: 8 },
 });
 
-const fontSizeStyles = StyleSheet.create({
-  small: { fontSize: fontSize.small },
-  normal: { fontSize: fontSize.default },
-  large: { fontSize: fontSize.large },
+// One step below the matching control size: the text has to fit inside a circle
+// as tall as the whole badge, so it cannot use the full-size body font.
+const textSizeStyles = StyleSheet.create({
+  small: { fontSize: fontSize.tiny },
+  normal: { fontSize: fontSize.small },
+  large: { fontSize: fontSize.default },
 });

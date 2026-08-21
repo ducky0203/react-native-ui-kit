@@ -58,6 +58,32 @@ export default function App() {
 | Lists    | `FlatList`, `SectionList`, `EmptyState` | Danh sách có refresh/load more, trạng thái trống |
 | Feedback | `ProgressBar`, `ProgressCircle`, `ToastProvider` / `useToast` | Tiến trình, toast stack (toast-message-ts + UI kit theme) |
 
+### Tùy biến style
+
+Mọi component đều nhận `style` cho phần tử ngoài cùng. Component nào render chữ
+thì nhận thêm một prop `TextStyle` để đổi cỡ chữ / màu chữ mà không phải sửa lib:
+
+| Component | Props style |
+|---|---|
+| `Button` | `style`, `textStyle` |
+| `InputText` | `style` (wrapper), `inputStyle` (khung + chữ), `labelStyle` |
+| `Select` | `style` (wrapper), `fieldStyle` (khung), `textStyle` (giá trị + option), `labelStyle` |
+| `Badge`, `Tag`, `Chip`, `Avatar`, `Divider`, `ProgressBar`, `ProgressCircle` | `style`, `textStyle` |
+| `Accordion`, `Panel`, `TabView` | `style`, `textStyle` (tiêu đề) |
+| `EmptyState` | `style`, `titleStyle`, `descriptionStyle` |
+| `Card`, `Screen`, `Menu`, `Typography` | `style` |
+| `FlatList`, `SectionList` | `style`, `contentContainerStyle` (props gốc của RN) |
+
+```tsx
+import { fontSize } from '@ducky0203/react-native-ui-kit';
+
+<InputText label="Mã" inputStyle={{ fontSize: fontSize.large }} />
+<Select options={options} textStyle={{ fontSize: fontSize.large }} />
+```
+
+> `InputText` và `Select` dùng chung metric trong `control` (cao 44, viền 1.5,
+> bo 3) nên mặc định luôn khớp nhau. Khi đổi cỡ chữ, đổi cả hai để giữ khớp.
+
 ### Button
 
 ```tsx
@@ -65,7 +91,7 @@ export default function App() {
   label="Lưu"
   icon="save"
   severity="primary"   // primary | secondary | success | info | warning | danger
-  size="normal"        // small | normal | large
+  size="normal"        // smallest | small | normal | large
   outlined             // viền, nền trong suốt
   text                 // không viền, không nền
   rounded              // bo tròn hoàn toàn
@@ -117,8 +143,14 @@ const options = [
   placeholder="Chọn thành phố..."
   invalid={hasError}
   errorText="Vui lòng chọn"
+  filter                              // hiện ô tìm kiếm trong dropdown
+  filterPlaceholder="Tìm thành phố"
+  emptyFilterMessage="Không tìm thấy"
 />
 ```
+
+> Các option trong dropdown được ngăn cách bằng đường kẻ mảnh
+> (`StyleSheet.hairlineWidth`).
 
 ### Card
 
@@ -220,15 +252,20 @@ const options = [
   data={items}
   renderItem={({ item }) => <ItemCard item={item} />}
   keyExtractor={(item) => item.id}
-  loading={isLoading}           // skeleton toàn màn hình
-  refreshing={isRefreshing}
-  onRefresh={handleRefresh}
-  loadingMore={isFetchingMore}
+  loading={isLoading}           // spinner ở footer (load lần đầu và load more)
+  onRefresh={handleRefresh}     // trả về promise -> spinner tắt khi promise xong
   onLoadMore={fetchNextPage}
+  canLoadMore={hasNextPage}     // bắt buộc true thì onLoadMore mới chạy
   emptyText="Không có dữ liệu"
   emptyIcon="inbox"
+  footerComponent={<Typography variant="caption">Hết danh sách</Typography>}
 />
 ```
+
+> `loading` hiện spinner ngay dưới item cuối, hoặc spinner giữa màn hình khi
+> list còn trống (load lần đầu). Footer có khoảng trống bằng 1/2 chiều cao list
+> để khi vuốt tới cuối, item không dính đáy màn hình. `SectionList` dùng chung
+> đúng API này (`sections` thay cho `data`).
 
 ### EmptyState
 
@@ -352,9 +389,32 @@ configureTheme({
 });
 ```
 
-Font sẽ áp dụng toàn bộ component: `Typography`, `Button`, `Badge`, `Chip`, `Tag`, `Avatar`, `Divider`, `InputText`, `ProgressBar`, `Menu`.
+Font áp dụng cho mọi component có chữ: `Typography`, `Button`, `Badge`, `Chip`,
+`Tag`, `Avatar`, `Divider`, `InputText`, `Select`, `ProgressBar`,
+`ProgressCircle`, `Menu`, `Toast`.
 
 > **Lưu ý:** Lib chỉ nhận *tên* font — việc load file font (`.otf`, `.ttf`) là trách nhiệm của app thông qua `expo-font`, `react-native-font` hoặc link native.
+
+#### Thang font size
+
+Component chỉ dùng các token dưới đây, không hardcode số:
+
+| Token | px | Dùng cho |
+|---|---|---|
+| `fontSize.tiny` | 10 | `Badge` size `small`, `Button` `smallest` |
+| `fontSize.small` | 12 | `Tag`, `Chip`, `Badge` `normal`, helper/error text, `Button` `small` |
+| `fontSize.default` | 14 | Chữ chính: `InputText`, `Select`, `Button` `normal`, `Menu`, `Typography` `body`/`label`/`h4` |
+| `fontSize.large` | 16 | `Button` `large`, `Badge` `large` |
+| `fontSize.h3` | 20 | `Typography` `h3` |
+| `fontSize.h2` | 24 | `Typography` `h2` |
+| `fontSize.h1` | 28 | `Typography` `h1` |
+
+`lineHeight` có token tương ứng nhưng **chỉ dùng cho chữ nhiều dòng**. Control
+một dòng (`InputText`, `Select`, ô tìm kiếm trong dropdown) cố tình không set
+`lineHeight`: trên iOS nó đẩy chữ lệch xuống khỏi tâm khung.
+
+`Avatar` là ngoại lệ duy nhất — cỡ chữ và icon scale theo đường kính
+(`label = dim * 0.4`, `icon = dim * 0.5`).
 
 Icon dùng tên Feather (ví dụ `'check-circle'`, `'menu'`). Type `IconName` được export từ thư viện.
 

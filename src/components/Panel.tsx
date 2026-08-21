@@ -8,6 +8,9 @@ import {
   StyleSheet,
   UIManager,
   View,
+  type StyleProp,
+  type TextStyle,
+  type ViewStyle,
 } from 'react-native';
 import { Icon } from './Icon';
 import { Typography } from './Typography';
@@ -33,6 +36,9 @@ export type PanelProps = {
   toggleable?: boolean;
   defaultCollapsed?: boolean;
   children?: ReactNode;
+  style?: StyleProp<ViewStyle>;
+  /** Style of the header title. */
+  textStyle?: StyleProp<TextStyle>;
 };
 
 function Chevron({ collapsed }: { collapsed: boolean }) {
@@ -61,6 +67,8 @@ export function Panel({
   toggleable = false,
   defaultCollapsed = false,
   children,
+  style,
+  textStyle,
 }: PanelProps) {
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
 
@@ -70,13 +78,13 @@ export function Panel({
   };
 
   const title = header ? (
-    <Typography variant="h4" style={styles.title}>
+    <Typography variant="h4" style={[styles.title, textStyle]}>
       {header}
     </Typography>
   ) : null;
 
   return (
-    <View style={styles.panel}>
+    <View style={[styles.panel, style]}>
       {header ? (
         toggleable ? (
           <Pressable

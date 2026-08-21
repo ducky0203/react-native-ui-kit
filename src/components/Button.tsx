@@ -4,14 +4,20 @@ import {
   Pressable,
   StyleSheet,
   Text,
+  View,
   type StyleProp,
+  type TextStyle,
   type ViewStyle,
 } from 'react-native';
 import { Icon, type IconName } from './Icon';
 import { colors, severityColors, type Severity } from '../theme/colors';
+import { control, controlHeight } from '../theme/sizing';
 import { fontSize, getFontStyle } from '../theme/typography';
 
-export type ButtonSize = 'small' | 'normal' | 'large';
+/** Fixed footprint of <ActivityIndicator size="small" /> on both platforms. */
+const spinnerSize = 20;
+
+export type ButtonSize = 'smallest' | 'small' | 'normal' | 'large';
 
 export type ButtonProps = {
   label?: string;
@@ -28,11 +34,13 @@ export type ButtonProps = {
   accessibilityLabel?: string;
   accessibilityHint?: string;
   style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
 };
 
 const sizeTokens: Record<
   ButtonSize,
   {
+    height: number;
     paddingV: number;
     paddingH: number;
     font: number;
@@ -40,16 +48,33 @@ const sizeTokens: Record<
     gap: number;
   }
 > = {
-  small: { paddingV: 6, paddingH: 12, font: fontSize.small, icon: 16, gap: 6 },
+  smallest: {
+    height: controlHeight.smallest,
+    paddingV: 2,
+    paddingH: 8,
+    font: fontSize.tiny,
+    icon: 12,
+    gap: 4,
+  },
+  small: {
+    height: controlHeight.small,
+    paddingV: 4,
+    paddingH: 10,
+    font: fontSize.small,
+    icon: 14,
+    gap: 4,
+  },
   normal: {
-    paddingV: 10,
+    height: controlHeight.normal,
+    paddingV: 8,
     paddingH: 16,
     font: fontSize.default,
     icon: 18,
     gap: 8,
   },
   large: {
-    paddingV: 14,
+    height: controlHeight.large,
+    paddingV: 10,
     paddingH: 20,
     font: fontSize.large,
     icon: 22,
@@ -72,6 +97,7 @@ export function Button({
   accessibilityLabel,
   accessibilityHint,
   style,
+  textStyle,
 }: ButtonProps) {
   const tone = severityColors[severity];
   const tokens = sizeTokens[size];
@@ -83,11 +109,11 @@ export function Button({
     (): ViewStyle => ({
       backgroundColor: filled ? tone : 'transparent',
       borderColor: outlined ? tone : 'transparent',
-      borderWidth: outlined ? 1.5 : 0,
+      borderWidth: outlined ? control.borderWidth : 0,
+      minHeight: tokens.height,
       paddingVertical: tokens.paddingV,
       paddingHorizontal: text ? tokens.paddingH / 2 : tokens.paddingH,
-      borderRadius: rounded ? 999 : 3,
-      gap: tokens.gap,
+      borderRadius: rounded ? 999 : control.borderRadius,
       opacity: isDisabled ? 0.5 : 1,
     }),
     [filled, tone, outlined, tokens, text, rounded, isDisabled]
@@ -98,8 +124,9 @@ export function Button({
       styles.label,
       { color: contentColor, fontSize: tokens.font },
       getFontStyle(),
+      textStyle,
     ],
-    [contentColor, tokens.font]
+    [contentColor, tokens.font, textStyle]
   );
 
   const iconNode = icon ? (
@@ -122,10 +149,25 @@ export function Button({
         style,
       ]}
     >
-      {loading ? <ActivityIndicator size="small" color={contentColor} /> : null}
-      {!loading && iconNode && iconPos === 'left' ? iconNode : null}
-      {label ? <Text style={labelStyle}>{label}</Text> : null}
-      {!loading && iconNode && iconPos === 'right' ? iconNode : null}
+      <View
+        style={[
+          styles.content,
+          { gap: tokens.gap },
+          loading && styles.contentHidden,
+        ]}
+      >
+        {iconNode && iconPos === 'left' ? iconNode : null}
+        {label ? <Text style={labelStyle}>{label}</Text> : null}
+        {iconNode && iconPos === 'right' ? iconNode : null}
+        {loading && !label && !iconNode ? (
+          <View style={styles.spinnerSlot} />
+        ) : null}
+      </View>
+      {loading ? (
+        <View style={styles.loadingOverlay} pointerEvents="none">
+          <ActivityIndicator size="small" color={contentColor} />
+        </View>
+      ) : null}
     </Pressable>
   );
 }
@@ -133,6 +175,27 @@ export function Button({
 const styles = StyleSheet.create({
   base: {
     flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  content: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  contentHidden: {
+    opacity: 0,
+  },
+  spinnerSlot: {
+    width: spinnerSize,
+    height: spinnerSize,
+  },
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },

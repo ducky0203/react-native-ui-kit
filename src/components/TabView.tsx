@@ -7,6 +7,9 @@ import {
   StyleSheet,
   View,
   type LayoutChangeEvent,
+  type StyleProp,
+  type TextStyle,
+  type ViewStyle,
 } from 'react-native';
 import { Icon, type IconName } from './Icon';
 import { Typography } from './Typography';
@@ -23,11 +26,20 @@ export type TabViewProps = {
   tabs: TabItem[];
   defaultIndex?: number;
   onChange?: (index: number) => void;
+  style?: StyleProp<ViewStyle>;
+  /** Style of the tab titles. */
+  textStyle?: StyleProp<TextStyle>;
 };
 
 type TabLayout = { x: number; width: number };
 
-export function TabView({ tabs, defaultIndex = 0, onChange }: TabViewProps) {
+export function TabView({
+  tabs,
+  defaultIndex = 0,
+  onChange,
+  style,
+  textStyle,
+}: TabViewProps) {
   const [index, setIndex] = useState(defaultIndex);
   const layoutsRef = useRef<Array<TabLayout | undefined>>([]);
 
@@ -96,7 +108,7 @@ export function TabView({ tabs, defaultIndex = 0, onChange }: TabViewProps) {
   const active = tabs[index];
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, style]}>
       <View accessibilityRole="tablist" style={styles.tabBar}>
         <ScrollView
           horizontal
@@ -125,6 +137,7 @@ export function TabView({ tabs, defaultIndex = 0, onChange }: TabViewProps) {
                 <Typography
                   variant="label"
                   color={isActive ? colors.primary : colors.textMuted}
+                  style={textStyle}
                 >
                   {tab.title}
                 </Typography>
