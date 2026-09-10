@@ -1,4 +1,11 @@
-import { useCallback, useMemo, useState, type ReactElement } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactElement,
+} from 'react';
 import {
   ActivityIndicator,
   RefreshControl,
@@ -19,7 +26,8 @@ export type ListChromeProps = {
   loading?: boolean;
   /**
    * Called on pull-to-refresh; omit to disable refresh. Return a promise and
-   * the spinner stays up until it settles.
+   * the spinner stays up until it settles. If you only flip `loading`, the
+   * spinner follows that instead.
    */
   onRefresh?: () => void | Promise<unknown>;
   /** Whether another page can still be loaded; must be `true` for `onLoadMore` to fire. */
@@ -40,11 +48,19 @@ export type ListChromeProps = {
   /** Message shown in the footer once there is nothing left to load. */
   endText?: string;
   /**
-   * Forces the end-of-list message on or off. Defaults to on for paginated
-   * lists only, i.e. when `onLoadMore` is given.
+   * Show `endText` in the footer when the list has data, is not loading, and
+   * `canLoadMore` is false. Off by default — pass true to opt in.
    */
   showEndMessage?: boolean;
 };
+
+function isThenable(value: unknown): value is PromiseLike<unknown> {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    typeof (value as PromiseLike<unknown>).then === 'function'
+  );
+}
 
 /**
  * Builds the shared refresh control, empty state and footer, memoised so a
@@ -61,45 +77,81 @@ export function useListChrome({
   emptyComponent,
   footerComponent,
   endText = 'No more items',
-  showEndMessage,
+  showEndMessage = false,
   hasData,
 }: ListChromeProps & { hasData: boolean }) {
-  const [refreshing, setRefreshing] = useState(false);
+  const [pulling, setPulling] = useState(false);
+  const pullSawLoading = useRef(false);
+  const releaseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Nothing more to fetch: show the end-of-list message instead of the
-  // load-more spinner. Unpaginated lists opt in through `showEndMessage`.
-  const atEnd =
-    hasData &&
-    !loading &&
-    !canLoadMore &&
-    (showEndMessage ?? Boolean(onLoadMore));
+  useEffect(() => {
+    return () => {
+      if (releaseTimer.current != null) {
+        clearTimeout(releaseTimer.current);
+      }
+    };
+  }, []);
+
+  // Parent-driven `loading`: keep the pull spinner up until the request that
+  // started after the gesture has actually finished.
+  useEffect(() => {
+    if (!pulling) {
+      pullSawLoading.current = false;
+      return;
+    }
+    if (loading) {
+      pullSawLoading.current = true;
+      return;
+    }
+    if (pullSawLoading.current) {
+      setPulling(false);
+    }
+  }, [loading, pulling]);
+
+  const atEnd = hasData && !loading && !canLoadMore && showEndMessage;
 
   const handleEndReached = useCallback(() => {
-    if (onLoadMore && canLoadMore && !loading && hasData) {
+    if (onLoadMore && canLoadMore && !loading && !pulling && hasData) {
       onLoadMore();
     }
-  }, [onLoadMore, canLoadMore, loading, hasData]);
+  }, [onLoadMore, canLoadMore, loading, pulling, hasData]);
 
-  const handleRefresh = useCallback(async () => {
-    setRefreshing(true);
-    try {
-      await onRefresh?.();
-    } finally {
-      setRefreshing(false);
+  const handleRefresh = useCallback(() => {
+    if (releaseTimer.current != null) {
+      clearTimeout(releaseTimer.current);
+      releaseTimer.current = null;
     }
+    pullSawLoading.current = false;
+    setPulling(true);
+    const result = onRefresh?.();
+    if (isThenable(result)) {
+      Promise.resolve(result).finally(() => {
+        pullSawLoading.current = false;
+        setPulling(false);
+      });
+      return;
+    }
+    // Fire-and-forget (typical Redux `dispatch`): wait a frame for `loading`
+    // to flip true. If it never does, drop the spinner so it cannot stick.
+    releaseTimer.current = setTimeout(() => {
+      releaseTimer.current = null;
+      if (!pullSawLoading.current) {
+        setPulling(false);
+      }
+    }, 64);
   }, [onRefresh]);
 
   const refreshControl = useMemo(
     () =>
       onRefresh ? (
         <RefreshControl
-          refreshing={refreshing}
+          refreshing={pulling}
           onRefresh={handleRefresh}
           colors={[colors.primary]}
           tintColor={colors.primary}
         />
       ) : undefined,
-    [onRefresh, refreshing, handleRefresh]
+    [onRefresh, pulling, handleRefresh]
   );
 
   // Rendered only while the list is empty, so `loading` here is the very
@@ -118,12 +170,15 @@ export function useListChrome({
   );
 
   // Bottom spacer stays as long as the list has items, whatever the footer
-  // holds, so the last item never sits against the screen bottom.
+  // holds, so the last item never sits against the screen bottom. Pull-to-
+  // refresh already shows its own spinner, so skip the footer one then.
   const footerElement = useMemo(
     () =>
       hasData ? (
         <View style={styles.footer}>
-          {loading ? <ActivityIndicator color={colors.primary} /> : null}
+          {loading && !pulling ? (
+            <ActivityIndicator color={colors.primary} />
+          ) : null}
           {atEnd ? (
             <Typography variant="caption" color={colors.textMuted}>
               {endText}
@@ -132,7 +187,7 @@ export function useListChrome({
           {footerComponent}
         </View>
       ) : undefined,
-    [hasData, loading, atEnd, endText, footerComponent]
+    [hasData, loading, pulling, atEnd, endText, footerComponent]
   );
 
   return { refreshControl, emptyElement, footerElement, handleEndReached };

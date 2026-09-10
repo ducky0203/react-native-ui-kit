@@ -1,7 +1,6 @@
 import { useCallback, useMemo, useRef } from 'react';
 import {
   FlatList as RNFlatList,
-  Platform,
   StyleSheet,
   type FlatListProps as RNFlatListProps,
   type ListRenderItem,
@@ -24,7 +23,8 @@ export type FlatListProps<ItemT> = Omit<
      * (width instead of height on a horizontal list). Lets the list place rows
      * without measuring them: no blank cells while scrolling fast, accurate
      * `scrollToIndex`, and a scrollbar that stops jumping. Leave it out for
-     * rows of varying size.
+     * rows of varying size. When set, a tighter render window is also applied
+     * unless you override `windowSize` / `maxToRenderPerBatch`.
      */
     itemHeight?: number;
     /** Called once, when the first batch of rows has been laid out. */
@@ -49,14 +49,11 @@ export function FlatList<ItemT>({
   extraData,
   getItemLayout,
   onContentSizeChange,
-  onEndReachedThreshold = 0.5,
-  // Keep roughly five viewports of rows mounted on each side instead of the
-  // ten React Native defaults to, and render them in smaller batches: closer
-  // to the draw distance FlashList works with, and far less work per frame.
-  windowSize = 11,
-  maxToRenderPerBatch = 8,
-  updateCellsBatchingPeriod = 50,
-  removeClippedSubviews = Platform.OS === 'android',
+  onEndReachedThreshold = 0.1,
+  windowSize,
+  maxToRenderPerBatch,
+  updateCellsBatchingPeriod,
+  removeClippedSubviews = false,
   contentContainerStyle,
   ...rest
 }: FlatListProps<ItemT>) {
@@ -82,12 +79,12 @@ export function FlatList<ItemT>({
   const handleContentSizeChange = useCallback(
     (width: number, height: number) => {
       onContentSizeChange?.(width, height);
-      if (!loadReported.current && height > 0) {
+      if (!loadReported.current && hasData && height > 0) {
         loadReported.current = true;
         onLoad?.({ elapsedTimeInMs: Date.now() - mountedAt.current });
       }
     },
-    [onContentSizeChange, onLoad]
+    [onContentSizeChange, onLoad, hasData]
   );
 
   const renderCell = useMemo<ListRenderItem<ItemT> | undefined>(() => {
@@ -118,6 +115,12 @@ export function FlatList<ItemT>({
     [contentContainerStyle]
   );
 
+  // Known row size is the only case where a smaller window is safe: RN can
+  // place rows without measuring. Variable-height rows keep RN defaults so
+  // fast flings don't flash blank cells. `removeClippedSubviews` stays off —
+  // the Android/Fabric default of true drops rows on New Architecture.
+  const fixedLayout = itemHeight !== undefined || getItemLayout != null;
+
   return (
     <RNFlatList<ItemT>
       {...rest}
@@ -129,9 +132,11 @@ export function FlatList<ItemT>({
       onContentSizeChange={handleContentSizeChange}
       onEndReached={onLoadMore ? handleEndReached : undefined}
       onEndReachedThreshold={onEndReachedThreshold}
-      windowSize={windowSize}
-      maxToRenderPerBatch={maxToRenderPerBatch}
-      updateCellsBatchingPeriod={updateCellsBatchingPeriod}
+      windowSize={windowSize ?? (fixedLayout ? 11 : undefined)}
+      maxToRenderPerBatch={maxToRenderPerBatch ?? (fixedLayout ? 8 : undefined)}
+      updateCellsBatchingPeriod={
+        updateCellsBatchingPeriod ?? (fixedLayout ? 50 : undefined)
+      }
       removeClippedSubviews={removeClippedSubviews}
       refreshControl={refreshControl}
       ListEmptyComponent={emptyElement}

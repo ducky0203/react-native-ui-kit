@@ -220,7 +220,7 @@ export function RecyclerListEngine<ItemT>({
       return;
     }
 
-    if (!loadReported.current) {
+    if (!loadReported.current && latest.current.items.length > 0) {
       loadReported.current = true;
       latest.current.onLoad?.({
         elapsedTimeInMs: Date.now() - mountedAt.current,

@@ -1,6 +1,5 @@
 import { useCallback, useMemo, useRef } from 'react';
 import {
-  Platform,
   SectionList as RNSectionList,
   StyleSheet,
   type SectionBase,
@@ -40,14 +39,11 @@ export function SectionList<ItemT, SectionT = unknown>({
   renderItem,
   extraData,
   onContentSizeChange,
-  onEndReachedThreshold = 0.5,
-  // Keep roughly five viewports of rows mounted on each side instead of the
-  // ten React Native defaults to, and render them in smaller batches: closer
-  // to the draw distance FlashList works with, and far less work per frame.
-  windowSize = 11,
-  maxToRenderPerBatch = 8,
-  updateCellsBatchingPeriod = 50,
-  removeClippedSubviews = Platform.OS === 'android',
+  onEndReachedThreshold = 0.1,
+  windowSize,
+  maxToRenderPerBatch,
+  updateCellsBatchingPeriod,
+  removeClippedSubviews = false,
   contentContainerStyle,
   ...rest
 }: SectionListProps<ItemT, SectionT>) {
@@ -75,12 +71,12 @@ export function SectionList<ItemT, SectionT = unknown>({
   const handleContentSizeChange = useCallback(
     (width: number, height: number) => {
       onContentSizeChange?.(width, height);
-      if (!loadReported.current && height > 0) {
+      if (!loadReported.current && hasData && height > 0) {
         loadReported.current = true;
         onLoad?.({ elapsedTimeInMs: Date.now() - mountedAt.current });
       }
     },
-    [onContentSizeChange, onLoad]
+    [onContentSizeChange, onLoad, hasData]
   );
 
   const renderCell = useMemo<

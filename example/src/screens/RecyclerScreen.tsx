@@ -91,6 +91,7 @@ export function RecyclerScreen() {
       canLoadMore={rows.length < 2000}
       onLoadMore={onLoadMore}
       emptyText="Chưa có dữ liệu"
+      showEndMessage
       endText="Đã tải hết 2000 dòng"
       onLoad={({ elapsedTimeInMs }) => setLoadTime(elapsedTimeInMs)}
       ListHeaderComponent={

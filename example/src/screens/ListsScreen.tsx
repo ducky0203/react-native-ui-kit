@@ -58,6 +58,7 @@ export function ListsScreen() {
       onLoadMore={onLoadMore}
       emptyText="Chưa có dữ liệu"
       emptyIcon="inbox"
+      showEndMessage
       endText="Đã tải hết danh sách"
       footerComponent={
         <View style={styles.footer}>

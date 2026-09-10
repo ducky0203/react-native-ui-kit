@@ -259,12 +259,13 @@ const renderItem = useCallback(
   keyExtractor={(item) => item.id}
   itemHeight={72}               // chỉ khi mọi hàng cao bằng nhau (kể cả separator)
   loading={isLoading}           // spinner ở footer (load lần đầu và load more)
-  onRefresh={handleRefresh}     // trả về promise -> spinner tắt khi promise xong
+  onRefresh={handleRefresh}     // promise *hoặc* `loading` — spinner kéo-refresh theo đó
   onLoadMore={fetchNextPage}
   canLoadMore={hasNextPage}     // bắt buộc true thì onLoadMore mới chạy
   emptyText="Không có dữ liệu"
   emptyIcon="inbox"
-  endText="Đã hết danh sách"      // mặc định "No more items"
+  showEndMessage                // hiện endText khi hết trang; mặc định tắt
+  endText="Đã hết danh sách"
   footerComponent={<Typography variant="caption">Hết danh sách</Typography>}
   onLoad={({ elapsedTimeInMs }) => console.log(elapsedTimeInMs)}
 />
@@ -272,15 +273,14 @@ const renderItem = useCallback(
 
 > `loading` hiện spinner ngay dưới item cuối, hoặc spinner giữa màn hình khi
 > list còn trống (load lần đầu). Footer chừa 50px trống ở đáy để khi vuốt tới
-> cuối, item không dính đáy màn hình. `onEndReachedThreshold` mặc định `0.5`,
-> tức nạp trước khi còn cách đáy nửa viewport. `SectionList` dùng chung đúng
+> cuối, item không dính đáy màn hình. `onEndReachedThreshold` mặc định `0.1`,
+> tức nạp khi còn cách đáy khoảng 10% viewport. `SectionList` dùng chung đúng
 > API này (`sections` thay cho `data`).
 
-> Khi list còn item và không còn gì để tải (`canLoadMore` = false, không
-> `loading`), footer hiện thông báo cuối trang `endText` (mặc định
-> `"No more items"`). Mặc định chỉ hiện với list phân trang (có `onLoadMore`);
-> dùng `showEndMessage` để bật/tắt thủ công, hoặc `footerComponent` nếu muốn
-> element riêng.
+> Thông báo cuối trang (`endText`, mặc định `"No more items"`) **tắt** cho đến
+> khi truyền `showEndMessage`. Khi bật, nó hiện lúc list còn item, không
+> `loading`, và `canLoadMore` = false. Dùng `footerComponent` nếu muốn element
+> riêng.
 
 #### Hiệu năng
 
@@ -290,9 +290,9 @@ Cả hai list đã bật sẵn vài tối ưu, học theo cách FlashList xử l
 |---|---|---|
 | Hàng không dựng lại vô ích | Mỗi hàng được bọc `memo`, chỉ so sánh `item` / `index` / `section` / `extraData` / `renderItem` | Đổi `loading`, `refreshing` hay state màn hình không làm render lại các hàng đang hiển thị — với điều kiện `renderItem` được bọc `useCallback` |
 | Props không đổi tham chiếu | `refreshControl`, empty, footer, `contentContainerStyle`, các handler đều `useMemo` / `useCallback` | VirtualizedList không phải dựng lại cell chỉ vì nhận object mới |
-| Cửa sổ render gọn hơn | `windowSize` 11 (RN mặc định 21), `maxToRenderPerBatch` 8, `removeClippedSubviews` bật trên Android | Giữ ~5 viewport mỗi phía thay vì 10: ít view, ít RAM, mỗi frame ít việc hơn |
+| Cửa sổ render gọn hơn | Chỉ khi có `itemHeight` / `getItemLayout`: `windowSize` 11, `maxToRenderPerBatch` 8. Không có thì giữ mặc định RN. `removeClippedSubviews` mặc định **tắt** (tránh hàng biến mất trên Android/Fabric) | Hàng cùng kích thước: ít view hơn. Hàng cao thấp khác nhau: không ô trắng khi vuốt nhanh |
 | Bỏ bước đo hàng | `itemHeight` sinh `getItemLayout` | Hết ô trắng khi vuốt nhanh, `scrollToIndex` chính xác, thanh cuộn không nhảy |
-| Đo thời gian tải | `onLoad({ elapsedTimeInMs })` | Bắn một lần khi lứa hàng đầu tiên layout xong |
+| Đo thời gian tải | `onLoad({ elapsedTimeInMs })` | Bắn một lần khi lứa hàng đầu tiên layout xong (bỏ qua list trống) |
 
 Các mặc định ở trên đều ghi đè được (`windowSize`, `maxToRenderPerBatch`,
 `removeClippedSubviews`, `initialNumToRender`, `updateCellsBatchingPeriod`).
@@ -329,6 +329,7 @@ const renderItem = useCallback(({ item }) => <Row item={item} />, []);
   onRefresh={refetch}
   canLoadMore={hasNext}
   onLoadMore={fetchNext}
+  showEndMessage
   onLoad={({ elapsedTimeInMs }) => console.log(elapsedTimeInMs)}
 />
 ```
