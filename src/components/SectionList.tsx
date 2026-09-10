@@ -1,16 +1,14 @@
-import { useState, type ReactElement } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import {
-  ActivityIndicator,
-  RefreshControl,
+  Platform,
   SectionList as RNSectionList,
   StyleSheet,
-  View,
   type SectionBase,
   type SectionListProps as RNSectionListProps,
+  type SectionListRenderItem,
 } from 'react-native';
-import { EmptyState } from './EmptyState';
-import type { IconName } from './Icon';
-import { colors } from '../theme/colors';
+import { ListCell } from './ListCell';
+import { useListChrome, type ListChromeProps } from './useListChrome';
 
 export type SectionListProps<ItemT, SectionT = unknown> = Omit<
   RNSectionListProps<ItemT, SectionT>,
@@ -20,107 +18,104 @@ export type SectionListProps<ItemT, SectionT = unknown> = Omit<
   | 'onEndReached'
   | 'ListEmptyComponent'
   | 'ListFooterComponent'
-> & {
-  /** Shows a spinner in the list footer (initial load and load-more). */
-  loading?: boolean;
-  /**
-   * Called on pull-to-refresh; omit to disable refresh. Return a promise and
-   * the spinner stays up until it settles.
-   */
-  onRefresh?: () => void | Promise<unknown>;
-  /** Whether another page can still be loaded; must be `true` for `onLoadMore` to fire. */
-  canLoadMore?: boolean;
-  /** Called when the list nears its end; omit to disable load-more. */
-  onLoadMore?: () => void;
-  /** Title shown by the default empty state. */
-  emptyText?: string;
-  /** Icon shown by the default empty state. */
-  emptyIcon?: IconName;
-  /** Custom element replacing the default empty state. */
-  emptyComponent?: ReactElement;
-  /**
-   * Element rendered under the last item, above the bottom spacer. The spacer
-   * is half the list viewport so the last items never sit against the screen
-   * bottom when scrolled to the end.
-   */
-  footerComponent?: ReactElement;
-};
+> &
+  ListChromeProps & {
+    /** Called once, when the first batch of rows has been laid out. */
+    onLoad?: (info: { elapsedTimeInMs: number }) => void;
+  };
 
 export function SectionList<ItemT, SectionT = unknown>({
-  loading = false,
+  loading,
   onRefresh,
-  canLoadMore = false,
+  canLoadMore,
   onLoadMore,
-  emptyText = 'No data',
-  emptyIcon = 'inbox',
+  emptyText,
+  emptyIcon,
   emptyComponent,
   footerComponent,
+  endText,
+  showEndMessage,
+  onLoad,
   sections,
-  onEndReachedThreshold = 0.1,
+  renderItem,
+  extraData,
+  onContentSizeChange,
+  onEndReachedThreshold = 0.5,
+  // Keep roughly five viewports of rows mounted on each side instead of the
+  // ten React Native defaults to, and render them in smaller batches: closer
+  // to the draw distance FlashList works with, and far less work per frame.
+  windowSize = 11,
+  maxToRenderPerBatch = 8,
+  updateCellsBatchingPeriod = 50,
+  removeClippedSubviews = Platform.OS === 'android',
   contentContainerStyle,
   ...rest
 }: SectionListProps<ItemT, SectionT>) {
-  const [refreshing, setRefreshing] = useState(false);
-  const spacerHeight = 80;
-
   const hasData = (sections as ReadonlyArray<SectionBase<ItemT>>).some(
     (section) => section.data.length > 0
   );
+  const mountedAt = useRef(Date.now());
+  const loadReported = useRef(false);
 
-  const handleEndReached = () => {
-    if (onLoadMore && canLoadMore && !loading && hasData) {
-      onLoadMore();
-    }
-  };
+  const { refreshControl, emptyElement, footerElement, handleEndReached } =
+    useListChrome({
+      loading,
+      onRefresh,
+      canLoadMore,
+      onLoadMore,
+      emptyText,
+      emptyIcon,
+      emptyComponent,
+      footerComponent,
+      endText,
+      showEndMessage,
+      hasData,
+    });
 
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    try {
-      await onRefresh?.();
-    } finally {
-      setRefreshing(false);
+  const handleContentSizeChange = useCallback(
+    (width: number, height: number) => {
+      onContentSizeChange?.(width, height);
+      if (!loadReported.current && height > 0) {
+        loadReported.current = true;
+        onLoad?.({ elapsedTimeInMs: Date.now() - mountedAt.current });
+      }
+    },
+    [onContentSizeChange, onLoad]
+  );
+
+  const renderCell = useMemo<
+    SectionListRenderItem<ItemT, SectionT> | undefined
+  >(() => {
+    if (!renderItem) {
+      return undefined;
     }
-  };
+    return (info) => (
+      <ListCell info={info} renderItem={renderItem} extraData={extraData} />
+    );
+  }, [renderItem, extraData]);
+
+  const content = useMemo(
+    () => [styles.content, contentContainerStyle],
+    [contentContainerStyle]
+  );
 
   return (
     <RNSectionList<ItemT, SectionT>
       {...rest}
       sections={sections}
-      contentContainerStyle={[styles.content, contentContainerStyle]}
+      renderItem={renderCell}
+      extraData={extraData}
+      contentContainerStyle={content}
+      onContentSizeChange={handleContentSizeChange}
       onEndReached={onLoadMore ? handleEndReached : undefined}
       onEndReachedThreshold={onEndReachedThreshold}
-      refreshControl={
-        onRefresh ? (
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            colors={[colors.primary]}
-            tintColor={colors.primary}
-          />
-        ) : undefined
-      }
-      // Rendered only while the list is empty, so `loading` here is the very
-      // first load: fill the viewport with a centered spinner instead of
-      // flashing the empty state.
-      ListEmptyComponent={
-        loading ? (
-          <View style={styles.loadingFill}>
-            <ActivityIndicator color={colors.primary} />
-          </View>
-        ) : (
-          (emptyComponent ?? <EmptyState icon={emptyIcon} title={emptyText} />)
-        )
-      }
-      ListFooterComponent={
-        // Bottom spacer stays as long as the list has items, whatever the
-        // footer holds, so the last item never sits against the screen bottom.
-        hasData ? (
-          <View style={[styles.footer, { paddingBottom: spacerHeight }]}>
-            {loading ? <ActivityIndicator color={colors.primary} /> : null}
-            {footerComponent}
-          </View>
-        ) : undefined
-      }
+      windowSize={windowSize}
+      maxToRenderPerBatch={maxToRenderPerBatch}
+      updateCellsBatchingPeriod={updateCellsBatchingPeriod}
+      removeClippedSubviews={removeClippedSubviews}
+      refreshControl={refreshControl}
+      ListEmptyComponent={emptyElement}
+      ListFooterComponent={footerElement}
     />
   );
 }
@@ -128,18 +123,5 @@ export function SectionList<ItemT, SectionT = unknown>({
 const styles = StyleSheet.create({
   content: {
     flexGrow: 1,
-  },
-  footer: {
-    width: '100%',
-    alignSelf: 'stretch',
-    alignItems: 'center',
-    paddingTop: 16,
-    gap: 8,
-  },
-  loadingFill: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 32,
   },
 });

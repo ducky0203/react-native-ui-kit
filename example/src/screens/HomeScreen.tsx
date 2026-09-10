@@ -45,6 +45,12 @@ export function HomeScreen({ navigation }: Props) {
       onPress: () => navigation.navigate('Lists'),
     },
     {
+      title: 'Recycler list',
+      description: 'List tái sử dụng view, 2000 dòng, 2 loại item',
+      icon: 'repeat',
+      onPress: () => navigation.navigate('Recycler'),
+    },
+    {
       title: 'Layout',
       description: 'Divider, Panel, Accordion, TabView',
       icon: 'layers',

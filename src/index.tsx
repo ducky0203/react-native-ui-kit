@@ -37,6 +37,15 @@ export type { FlatListProps } from './components/FlatList';
 export { SectionList } from './components/SectionList';
 export type { SectionListProps } from './components/SectionList';
 
+export { RecyclerList } from './components/RecyclerList';
+export type {
+  RecyclerListProps,
+  RecyclerListRef,
+} from './components/RecyclerList';
+export { configureListBackend } from './list/backend';
+export { useRecyclingState } from './list/useRecyclingState';
+export type { ListChromeProps } from './components/useListChrome';
+
 export { Menu } from './components/Menu';
 export type {
   MenuAlign,

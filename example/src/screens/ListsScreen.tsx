@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import {
   Button,
@@ -6,6 +6,8 @@ import {
   Typography,
   colors,
 } from '@ducky0203/react-native-ui-kit';
+
+const ROW_HEIGHT = 52;
 
 const makeItems = (start: number, count: number): number[] =>
   Array.from({ length: count }, (_, i) => start + i);
@@ -22,6 +24,17 @@ export function ListsScreen() {
       }, 1200);
     });
 
+  // renderItem giữ nguyên tham chiếu -> hàng đã render không dựng lại mỗi khi
+  // `loading` hay state màn hình đổi.
+  const renderItem = useCallback(
+    ({ item }: { item: number }) => (
+      <View style={styles.row}>
+        <Typography variant={'caption'}>Item #{item + 1}</Typography>
+      </View>
+    ),
+    []
+  );
+
   const onLoadMore = () => {
     if (loading || items.length >= 60) {
       return;
@@ -37,17 +50,15 @@ export function ListsScreen() {
     <FlatList<number>
       data={items}
       keyExtractor={(item) => String(item)}
-      renderItem={({ item }) => (
-        <View style={styles.row}>
-          <Typography variant={'caption'}>Item #{item + 1}</Typography>
-        </View>
-      )}
+      renderItem={renderItem}
+      itemHeight={ROW_HEIGHT}
       onRefresh={onRefresh}
       loading={loading}
       canLoadMore={items.length < 60}
       onLoadMore={onLoadMore}
       emptyText="Chưa có dữ liệu"
       emptyIcon="inbox"
+      endText="Đã tải hết danh sách"
       footerComponent={
         <View style={styles.footer}>
           <Typography variant={'caption'} style={styles.footerText}>
@@ -81,8 +92,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   row: {
+    height: ROW_HEIGHT,
+    justifyContent: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 14,
     backgroundColor: colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,

@@ -11,6 +11,7 @@ import { ButtonsScreen } from './screens/ButtonsScreen';
 import { FormScreen } from './screens/FormScreen';
 import { DisplayScreen } from './screens/DisplayScreen';
 import { ListsScreen } from './screens/ListsScreen';
+import { RecyclerScreen } from './screens/RecyclerScreen';
 import { LayoutScreen } from './screens/LayoutScreen';
 import { FeedbackScreen } from './screens/FeedbackScreen';
 
@@ -47,6 +48,11 @@ export default function App() {
                 name="Lists"
                 component={ListsScreen}
                 options={{ title: 'Lists' }}
+              />
+              <Stack.Screen
+                name="Recycler"
+                component={RecyclerScreen}
+                options={{ title: 'Recycler list' }}
               />
               <Stack.Screen
                 name="Layout"

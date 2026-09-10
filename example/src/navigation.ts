@@ -4,6 +4,7 @@ export type RootStackParamList = {
   Form: undefined;
   Display: undefined;
   Lists: undefined;
+  Recycler: undefined;
   Layout: undefined;
   Feedback: undefined;
 };

@@ -55,7 +55,7 @@ export default function App() {
 | Actions  | `Button`, `Chip`, `Tag`, `Menu` | Nút, chip, tag, menu dropdown |
 | Form     | `InputText`, `Select` | Ô nhập, chọn giá trị |
 | Display  | `Typography`, `Card`, `Badge`, `Avatar`, `Icon` | Chữ, thẻ, huy hiệu, avatar, icon Feather |
-| Lists    | `FlatList`, `SectionList`, `EmptyState` | Danh sách có refresh/load more, trạng thái trống |
+| Lists    | `FlatList`, `SectionList`, `RecyclerList`, `EmptyState` | Danh sách có refresh/load more, trạng thái trống; `RecyclerList` tái sử dụng view |
 | Feedback | `ProgressBar`, `ProgressCircle`, `ToastProvider` / `useToast` | Tiến trình, toast stack (toast-message-ts + UI kit theme) |
 
 ### Tùy biến style
@@ -72,7 +72,7 @@ thì nhận thêm một prop `TextStyle` để đổi cỡ chữ / màu chữ m�
 | `Accordion`, `Panel`, `TabView` | `style`, `textStyle` (tiêu đề) |
 | `EmptyState` | `style`, `titleStyle`, `descriptionStyle` |
 | `Card`, `Screen`, `Menu`, `Typography` | `style` |
-| `FlatList`, `SectionList` | `style`, `contentContainerStyle` (props gốc của RN) |
+| `FlatList`, `SectionList`, `RecyclerList` | `style`, `contentContainerStyle` (props gốc của RN) |
 
 ```tsx
 import { fontSize } from '@ducky0203/react-native-ui-kit';
@@ -248,24 +248,131 @@ const options = [
 ### FlatList / SectionList
 
 ```tsx
+const renderItem = useCallback(
+  ({ item }) => <ItemCard item={item} />,
+  []
+);
+
 <FlatList
   data={items}
-  renderItem={({ item }) => <ItemCard item={item} />}
+  renderItem={renderItem}
   keyExtractor={(item) => item.id}
+  itemHeight={72}               // chỉ khi mọi hàng cao bằng nhau (kể cả separator)
   loading={isLoading}           // spinner ở footer (load lần đầu và load more)
   onRefresh={handleRefresh}     // trả về promise -> spinner tắt khi promise xong
   onLoadMore={fetchNextPage}
   canLoadMore={hasNextPage}     // bắt buộc true thì onLoadMore mới chạy
   emptyText="Không có dữ liệu"
   emptyIcon="inbox"
+  endText="Đã hết danh sách"      // mặc định "No more items"
   footerComponent={<Typography variant="caption">Hết danh sách</Typography>}
+  onLoad={({ elapsedTimeInMs }) => console.log(elapsedTimeInMs)}
 />
 ```
 
 > `loading` hiện spinner ngay dưới item cuối, hoặc spinner giữa màn hình khi
-> list còn trống (load lần đầu). Footer có khoảng trống bằng 1/2 chiều cao list
-> để khi vuốt tới cuối, item không dính đáy màn hình. `SectionList` dùng chung
-> đúng API này (`sections` thay cho `data`).
+> list còn trống (load lần đầu). Footer chừa 50px trống ở đáy để khi vuốt tới
+> cuối, item không dính đáy màn hình. `onEndReachedThreshold` mặc định `0.5`,
+> tức nạp trước khi còn cách đáy nửa viewport. `SectionList` dùng chung đúng
+> API này (`sections` thay cho `data`).
+
+> Khi list còn item và không còn gì để tải (`canLoadMore` = false, không
+> `loading`), footer hiện thông báo cuối trang `endText` (mặc định
+> `"No more items"`). Mặc định chỉ hiện với list phân trang (có `onLoadMore`);
+> dùng `showEndMessage` để bật/tắt thủ công, hoặc `footerComponent` nếu muốn
+> element riêng.
+
+#### Hiệu năng
+
+Cả hai list đã bật sẵn vài tối ưu, học theo cách FlashList xử lý danh sách dài:
+
+| Việc | Cách làm | Được gì |
+|---|---|---|
+| Hàng không dựng lại vô ích | Mỗi hàng được bọc `memo`, chỉ so sánh `item` / `index` / `section` / `extraData` / `renderItem` | Đổi `loading`, `refreshing` hay state màn hình không làm render lại các hàng đang hiển thị — với điều kiện `renderItem` được bọc `useCallback` |
+| Props không đổi tham chiếu | `refreshControl`, empty, footer, `contentContainerStyle`, các handler đều `useMemo` / `useCallback` | VirtualizedList không phải dựng lại cell chỉ vì nhận object mới |
+| Cửa sổ render gọn hơn | `windowSize` 11 (RN mặc định 21), `maxToRenderPerBatch` 8, `removeClippedSubviews` bật trên Android | Giữ ~5 viewport mỗi phía thay vì 10: ít view, ít RAM, mỗi frame ít việc hơn |
+| Bỏ bước đo hàng | `itemHeight` sinh `getItemLayout` | Hết ô trắng khi vuốt nhanh, `scrollToIndex` chính xác, thanh cuộn không nhảy |
+| Đo thời gian tải | `onLoad({ elapsedTimeInMs })` | Bắn một lần khi lứa hàng đầu tiên layout xong |
+
+Các mặc định ở trên đều ghi đè được (`windowSize`, `maxToRenderPerBatch`,
+`removeClippedSubviews`, `initialNumToRender`, `updateCellsBatchingPeriod`).
+`itemHeight` chỉ dùng khi mọi hàng **thực sự** cùng kích thước — sai số sẽ làm
+lệch vị trí cuộn; hàng cao thấp khác nhau thì bỏ prop này đi.
+
+> Muốn thêm nữa: `maintainVisibleContentPosition={{ minIndexForVisible: 0 }}`
+> (prop gốc của RN, truyền thẳng qua) giữ nguyên vị trí đang xem khi chèn item
+> lên đầu — FlashList v2 bật mặc định cho chat/feed đảo chiều.
+
+> Cần tái sử dụng view thật sự (list rất dài, nhiều loại item) thì dùng
+> [`RecyclerList`](#recyclerlist) ngay bên dưới.
+
+### RecyclerList
+
+List có **recycling**: hàng cuộn ra khỏi vùng render không bị unmount mà được
+giao lại cho hàng kế tiếp *cùng loại*, đúng mô hình RecyclerView của Android mà
+FlashList dùng. Bộ prop tiện ích (`loading`, `onRefresh`, `onLoadMore`,
+`emptyText`, `endText`, `footerComponent`...) giống hệt `FlatList` của kit.
+
+```tsx
+import { RecyclerList, useRecyclingState } from '@ducky0203/react-native-ui-kit';
+
+const renderItem = useCallback(({ item }) => <Row item={item} />, []);
+
+<RecyclerList
+  data={rows}
+  renderItem={renderItem}
+  keyExtractor={(item) => item.id}
+  getItemType={(item) => item.kind}   // 'header' | 'row' -> mỗi loại một pool view
+  estimatedItemSize={56}              // chỉ là phỏng đoán ban đầu, sẽ tự đo lại
+  drawDistance={250}                  // px giữ sẵn mỗi phía ngoài màn hình
+  loading={loading}
+  onRefresh={refetch}
+  canLoadMore={hasNext}
+  onLoadMore={fetchNext}
+  onLoad={({ elapsedTimeInMs }) => console.log(elapsedTimeInMs)}
+/>
+```
+
+Engine làm gì:
+
+| Việc | Cách làm |
+|---|---|
+| Tái sử dụng view | Pool React key theo `getItemType`; hàng ra khỏi vùng render trả key về pool, hàng mới nhận lại đúng key nên React chỉ cập nhật props |
+| Không cần biết chiều cao | Hàng vẽ ở kích thước ước lượng theo loại, `onLayout` báo kích thước thật, layout xếp lại — ước lượng là trung bình trượt của chính các hàng đã đo |
+| Không nhảy nội dung | Khi hàng phía trên viewport đổi kích thước, list bù lại `scrollTo` để hàng đang xem đứng yên |
+| Buffer theo hướng cuộn | `drawDistance` chia 70/30 về phía đang cuộn tới, giống FlashList |
+| Chỉ render khi cần | Hàng nằm tuyệt đối, nên cuộn không tự nó render lại — chỉ render khi tập hàng cần mount thay đổi |
+
+`useRecyclingState` cho state của từng hàng: view được tái sử dụng nên `useState`
+thường sẽ mang trạng thái của item cũ sang item mới.
+
+```tsx
+const [expanded, setExpanded] = useRecyclingState(false, [item.id]);
+```
+
+#### Dùng FlashList làm backend
+
+Nếu app đã có `@shopify/flash-list`, đăng ký một lần lúc khởi động là mọi
+`RecyclerList` chuyển sang chạy trên nó, prop giữ nguyên:
+
+```tsx
+import { FlashList } from '@shopify/flash-list';
+import { configureListBackend } from '@ducky0203/react-native-ui-kit';
+
+configureListBackend(FlashList);   // truyền null để quay lại engine của kit
+```
+
+Đăng ký thủ công chứ không tự dò: Metro resolve import tĩnh, nên nếu kit
+`require('@shopify/flash-list')` thì app **không** cài sẽ vỡ lúc bundle. Kit chỉ
+khai báo nó là peer dependency tuỳ chọn.
+
+> Giới hạn engine của kit (bản đầu): chỉ layout tuyến tính một cột (dọc hoặc
+> ngang) — chưa có `numColumns`/masonry, sticky header, `inverted`,
+> `onViewableItemsChanged`. Hàng không được tự đổi kích thước sau khi render
+> (đo xong lại co giãn) — dùng state để đổi kích thước thì được. Cần những thứ
+> đó thì đăng ký FlashList làm backend như trên. `FlatList` của kit vẫn là lựa
+> chọn mặc định cho list ngắn và vừa: nó là `FlatList` gốc nên có đủ mọi tính
+> năng của RN.
 
 ### EmptyState
 
@@ -472,8 +579,9 @@ Script `release` chạy `clean` → `build` (bob) → `npm publish`. Chỉ các 
 
 | Export | Mô tả |
 |---|---|
-| Components | `Screen`, `Button`, `Typography`, `InputText`, `Select`, `Card`, `Badge`, `Avatar`, `Chip`, `Tag`, `Icon`, `Divider`, `Menu`, `Accordion`, `Panel`, `TabView`, `FlatList`, `SectionList`, `EmptyState`, `ProgressBar`, `ProgressCircle` |
+| Components | `Screen`, `Button`, `Typography`, `InputText`, `Select`, `Card`, `Badge`, `Avatar`, `Chip`, `Tag`, `Icon`, `Divider`, `Menu`, `Accordion`, `Panel`, `TabView`, `FlatList`, `SectionList`, `RecyclerList`, `EmptyState`, `ProgressBar`, `ProgressCircle` |
 | Toast | `ToastProvider`, `useToast`, `showToast`, `Toast`, `ToastContainer`, `uiKitToastConfig` |
+| Lists | `configureListBackend`, `useRecyclingState` |
 | Theme | `configureTheme`, `colors`, `severityColors`, `getFontStyle` |
 | Types | `Severity`, `Colors`, `IconName`, tất cả `*Props` types |
 | Re-exports | `SafeAreaProvider`, `SafeAreaView`, `useSafeAreaInsets`, `FeatherIcon` |

@@ -1,6 +1,6 @@
 {
   "name": "@ducky0203/react-native-ui-kit",
-  "version": "1.0.7",
+  "version": "1.0.9",
   "description": "A React Native UI kit library",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
@@ -84,9 +84,15 @@
   },
   "peerDependencies": {
     "@react-native-vector-icons/feather": ">=13.0.0",
+    "@shopify/flash-list": ">=1.7.0",
     "react": "*",
     "react-native": "*",
     "react-native-safe-area-context": ">=5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@shopify/flash-list": {
+      "optional": true
+    }
   },
   "packageManager": "yarn@4.11.0",
   "react-native-builder-bob": {
